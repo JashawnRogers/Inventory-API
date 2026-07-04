@@ -1,5 +1,6 @@
 package com.jashawn.inventory_api.product;
 
+import com.jashawn.inventory_api.category.Category;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -45,6 +46,10 @@ public class Product {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @JoinColumn(name = "category_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Category category;
 
     public Product(
             String name,
