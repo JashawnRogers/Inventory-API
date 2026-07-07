@@ -1,8 +1,10 @@
 package com.jashawn.inventory_api.Exceptions;
 
-public class InvalidStateException extends RuntimeException{
+import org.springframework.http.HttpStatus;
+
+public class InvalidStateException extends BaseDomainException{
 
     public InvalidStateException(String message) {
-        super(message);
+        super(HttpStatus.BAD_REQUEST, message);
     }
 }

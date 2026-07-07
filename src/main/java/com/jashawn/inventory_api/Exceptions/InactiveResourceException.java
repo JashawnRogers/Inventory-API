@@ -1,7 +1,9 @@
 package com.jashawn.inventory_api.Exceptions;
 
-public class InactiveResourceException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class InactiveResourceException extends BaseDomainException {
     public InactiveResourceException(String message) {
-        super(message);
+        super(HttpStatus.BAD_REQUEST, message);
     }
 }

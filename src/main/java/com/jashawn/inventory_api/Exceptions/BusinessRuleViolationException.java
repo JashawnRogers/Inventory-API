@@ -1,7 +1,9 @@
 package com.jashawn.inventory_api.Exceptions;
 
-public class BusinessRuleViolationException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class BusinessRuleViolationException extends BaseDomainException {
     public BusinessRuleViolationException(String message) {
-        super(message);
+        super(HttpStatus.BAD_REQUEST, message);
     }
 }
