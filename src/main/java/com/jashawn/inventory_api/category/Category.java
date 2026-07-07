@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,13 +39,13 @@ public class Category {
     private List<Product> products;
 
     @PrePersist
-    private void initializeCategory() {
+    private void initialize() {
         this.isActive = true;
         this.createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    private void setUpdatedAtTimestamp() {
+    private void setUpdatedAt() {
         this.updatedAt = LocalDateTime.now();
     }
 }
