@@ -5,15 +5,12 @@ import com.jashawn.inventory_api.Exceptions.InactiveResourceException;
 import com.jashawn.inventory_api.Exceptions.ResourceNotFoundException;
 import com.jashawn.inventory_api.category.Category;
 import com.jashawn.inventory_api.category.CategoryRepository;
-import com.jashawn.inventory_api.category.dto.CategoryDtoMapper;
-import com.jashawn.inventory_api.category.dto.CategoryResponse;
 import com.jashawn.inventory_api.product.dto.CreateProductRequest;
 import com.jashawn.inventory_api.product.dto.ProductDtoMapper;
 import com.jashawn.inventory_api.product.dto.ProductResponse;
+import com.jashawn.inventory_api.product.dto.UpdateProductRequest;
 import com.jashawn.inventory_api.supplier.Supplier;
 import com.jashawn.inventory_api.supplier.SupplierRepository;
-import com.jashawn.inventory_api.supplier.dto.SupplierDtoMapper;
-import com.jashawn.inventory_api.supplier.dto.SupplierResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -99,61 +96,59 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse updateProductName(UUID id, String name) {
+    public ProductResponse updateProduct(UUID id, UpdateProductRequest request) {
+
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cannot find product with ID: " + id));
 
+        if (request.name() != null) {
+            updateProductName(product, request.name());
+        }
+
+        if (request.description() != null) {
+            product.updateDescription(request.description());
+        }
+
+        if (request.unitCost() != null) {
+            product.updateUnitCost(request.unitCost());
+        }
+
+        if (request.reorderPoint() != null) {
+            product.updateReorderPoint(request.reorderPoint());
+        }
+
+        if (request.categoryId() != null) {
+            Category category = categoryRepository.findById(request.categoryId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Cannot not find category with ID: " + id));
+
+            product.updateCategory(category);
+        }
+
+        if (request.supplierId() != null) {
+            Supplier supplier = supplierRepository.findById(request.supplierId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Cannot not find supplier with ID: " + id));
+
+            product.updateSupplier(supplier);
+        }
+
+        Product saved = productRepository.save(product);
+
+        return ProductDtoMapper.toDto(saved);
+    }
+
+    private void updateProductName(Product product, String name) {
         String newProductName = name.trim();
 
         if (product.getName().equals(newProductName)) {
-            return ProductDtoMapper.toDto(product);
+            throw new DuplicateResourceException("The name " + newProductName + " is already in use.");
         }
 
-        // Check before making call to update DB
+        // Check before writing to DB
         if (productRepository.findByName(newProductName).isPresent()) {
             throw new DuplicateResourceException("The name " + newProductName + " is already in use.");
         }
 
         product.updateName(newProductName);
-
-            Product saved = productRepository.save(product);
-            return ProductDtoMapper.toDto(saved);
-    }
-
-    @Transactional
-    public ProductResponse updateProductReorderPoint(UUID id, int reorderPoint) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cannot find product with ID: " + id));
-
-        product.updateReorderPoint(reorderPoint);
-
-        Product saved = productRepository.save(product);
-
-        return ProductDtoMapper.toDto(saved);
-    }
-
-    @Transactional
-    public ProductResponse updateProductDescription(UUID id, String description) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cannot find product with ID: " + id));
-
-        product.updateDescription(description);
-
-        Product saved = productRepository.save(product);
-
-        return ProductDtoMapper.toDto(saved);
-    }
-
-    @Transactional
-    public ProductResponse updateProductUnitCost(UUID id, BigDecimal unitCost) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cannot find product with ID: " + id));
-
-        product.updateUnitCost(unitCost);
-
-        Product saved = productRepository.save(product);
-
-        return ProductDtoMapper.toDto(saved);
     }
 
     @Transactional

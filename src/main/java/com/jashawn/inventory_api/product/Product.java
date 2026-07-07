@@ -1,6 +1,8 @@
 package com.jashawn.inventory_api.product;
 
 import com.jashawn.inventory_api.Exceptions.BusinessRuleViolationException;
+import com.jashawn.inventory_api.Exceptions.DuplicateResourceException;
+import com.jashawn.inventory_api.Exceptions.InactiveResourceException;
 import com.jashawn.inventory_api.Exceptions.InvalidStateException;
 import com.jashawn.inventory_api.category.Category;
 import com.jashawn.inventory_api.supplier.Supplier;
@@ -161,6 +163,40 @@ public class Product {
         } else {
             this.description = description.trim();
         }
+    }
+
+    public void updateCategory(Category category) {
+        if (!canBeUpdated()) {
+            throw new BusinessRuleViolationException("Product is inactive. Cannot perform update.");
+        }
+
+        if (!category.isActive()) {
+            throw new InactiveResourceException(
+                    "Category " + category.getName() + " is inactive and cannot be assigned to products.");
+        }
+
+        if (category.getId().equals(this.category.getId())) {
+            throw new DuplicateResourceException("Category already exists.");
+        }
+
+        this.category = category;
+    }
+
+    public void updateSupplier(Supplier supplier) {
+        if (!canBeUpdated()) {
+            throw new BusinessRuleViolationException("Product is inactive. Cannot perform update.");
+        }
+
+        if (!supplier.isActive()) {
+            throw new InactiveResourceException(
+                    "Supplier " + supplier.getName() + " is inactive and cannot be assigned to products.");
+        }
+
+        if (supplier.getId().equals(this.supplier.getId())) {
+            throw new DuplicateResourceException("Supplier already exists.");
+        }
+
+        this.supplier = supplier;
     }
 
     public void softDelete() {

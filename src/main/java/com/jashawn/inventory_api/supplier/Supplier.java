@@ -1,12 +1,10 @@
 package com.jashawn.inventory_api.supplier;
 
-import com.jashawn.inventory_api.product.Product;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -30,10 +28,6 @@ public class Supplier {
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
-
-    // Using cascade types to prevent orphaned products
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    private List<Product> products;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

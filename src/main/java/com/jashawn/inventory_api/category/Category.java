@@ -1,12 +1,10 @@
 package com.jashawn.inventory_api.category;
 
-import com.jashawn.inventory_api.product.Product;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -33,10 +31,6 @@ public class Category {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    // Using cascade types to prevent orphaned products
-    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<Product> products;
 
     @PrePersist
     private void initialize() {
