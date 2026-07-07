@@ -14,7 +14,6 @@ import com.jashawn.inventory_api.supplier.Supplier;
 import com.jashawn.inventory_api.supplier.SupplierRepository;
 import com.jashawn.inventory_api.supplier.dto.SupplierDtoMapper;
 import com.jashawn.inventory_api.supplier.dto.SupplierResponse;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -67,8 +66,6 @@ public class ProductService {
         );
 
         Product saved = productRepository.save(product);
-        CategoryResponse categoryDto = CategoryDtoMapper.toDto(category);
-        SupplierResponse supplierDto = SupplierDtoMapper.toDto(supplier);
 
         return ProductDtoMapper.toDto(saved);
     }
@@ -76,12 +73,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductResponse findProduct(UUID id) {
        return productRepository.findById(id)
-                .map(product -> {
-                    CategoryResponse category = CategoryDtoMapper.toDto(product.getCategory());
-                    SupplierResponse supplier = SupplierDtoMapper.toDto(product.getSupplier());
-
-                    return ProductDtoMapper.toDto(product);
-                })
+                .map(ProductDtoMapper::toDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Cannot find product with ID: " + id));
     }
 
