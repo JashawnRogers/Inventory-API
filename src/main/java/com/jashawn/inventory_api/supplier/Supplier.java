@@ -1,5 +1,7 @@
 package com.jashawn.inventory_api.supplier;
 
+import com.jashawn.inventory_api.Exceptions.InvalidStateException;
+import com.jashawn.inventory_api.util.ValidationUtils;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +36,72 @@ public class Supplier {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    protected Supplier() {}
+
+    private Supplier(String name, String email, String phone) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+    }
+
+    public static Supplier create(String name, String email, String phone) {
+        if (name == null || name.isBlank()) {
+            throw new InvalidStateException("Missing name.");
+        }
+
+        if (!ValidationUtils.isValidUSPhone(phone)) {
+            throw new InvalidStateException("Invalid phone number");
+        }
+
+        if (!ValidationUtils.isValidEmail(email)) {
+            throw new InvalidStateException("Invalid email.");
+        }
+
+        String formattedPhone = ValidationUtils.formatPhone(phone);
+
+        return new Supplier(name.trim(), email.trim(), formattedPhone.trim());
+    }
+
+    public void updateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new InvalidStateException("Invalid name.");
+        }
+
+        this.name = name.trim();
+    }
+
+    public void updateEmail(String email) {
+        if (!ValidationUtils.isValidEmail(email)) {
+            throw new InvalidStateException("Invalid email.");
+        }
+
+        this.email = email;
+    }
+
+    public void updatePhone(String phone) {
+        if (!ValidationUtils.isValidUSPhone(phone)) {
+            throw new InvalidStateException("Invalid email.");
+        }
+
+        this.email = ValidationUtils.formatPhone(phone).trim();
+    }
+
+    public void deactivate() {
+        this.isActive = false;
+    }
+
+    public void activate() {
+        this.isActive = true;
+    }
+
+    public void softDelete() {
+        this.isActive = false;
+        this.deletedAt = LocalDateTime.now();
+    }
 
     @PrePersist
     private void initializeSupplier() {
