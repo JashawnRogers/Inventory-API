@@ -39,7 +39,7 @@ public class ProductController {
 
     @GetMapping("/v1/products/{id}")
     public ResponseEntity<?> findProduct(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findProduct(id));
+        return ResponseEntity.ok(assembler.toModel(service.findProduct(id)));
     }
 
     @GetMapping("/v1/products")

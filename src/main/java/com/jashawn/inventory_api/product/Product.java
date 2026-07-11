@@ -126,11 +126,11 @@ public class Product {
     }
 
     public boolean canBeUpdated() {
-        return this.isActive || this.deletedAt == null;
+        return !this.isActive && this.deletedAt != null;
     }
 
     public void updateReorderPoint(int reorderPoint) {
-        if (!canBeUpdated()) {
+        if (canBeUpdated()) {
             throw new BusinessRuleViolationException("Product is inactive. Cannot perform update.");
         }
 
@@ -166,7 +166,7 @@ public class Product {
     }
 
     public void updateCategory(Category category) {
-        if (!canBeUpdated()) {
+        if (canBeUpdated()) {
             throw new BusinessRuleViolationException("Product is inactive. Cannot perform update.");
         }
 
@@ -183,7 +183,7 @@ public class Product {
     }
 
     public void updateSupplier(Supplier supplier) {
-        if (!canBeUpdated()) {
+        if (canBeUpdated()) {
             throw new BusinessRuleViolationException("Product is inactive. Cannot perform update.");
         }
 
