@@ -1,7 +1,7 @@
 package com.jashawn.inventory_api.category;
 
 import com.jashawn.inventory_api.Exceptions.DuplicateResourceException;
-import com.jashawn.inventory_api.Exceptions.InvalidStateException;
+import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,23 +46,23 @@ public class Category {
 
     public static Category create(String name, String description) {
         if (name == null || !name.isBlank()) {
-            throw new InvalidStateException("Missing name");
+            throw new InvalidFieldException(name, "Category", "name");
         }
 
         if (description != null) {
             return new Category(name.trim(), description.trim());
         }
 
-        return new Category(name.trim(), description);
+        return new Category(name.trim(), null);
     }
 
     public void updateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new InvalidStateException("Missing category name.");
+            throw new InvalidFieldException(name, "Category", "name");
         }
 
         if (this.name.equals(name)) {
-            throw new DuplicateResourceException("The name " + name + " is already in use.");
+            throw new DuplicateResourceException("Category", "name", name);
         }
 
         this.name = name.trim();

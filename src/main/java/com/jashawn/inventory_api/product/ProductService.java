@@ -38,19 +38,17 @@ public class ProductService {
     @Transactional
     public ProductResponse createProduct(CreateProductRequest request) {
         Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Cannot find category with ID: " + request.categoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "ID",  request.categoryId().toString()));
 
         Supplier supplier = supplierRepository.findById(request.supplierId())
-                .orElseThrow(() -> new ResourceNotFoundException("Cannot find supplier with ID: " + request.supplierId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "ID",  request.supplierId().toString()));
 
         if (!category.isActive()) {
-            throw new InactiveResourceException
-                    ("The " + category.getName() + " category is inactive. Make the category active or select a different category.");
+            throw new InactiveResourceException(request.name(), "Category: " + category.getName());
         }
 
         if (!supplier.isActive()) {
-            throw new InactiveResourceException
-                    ("The supplier, " + supplier.getName() + ", is inactive. Make the supplier active or select a different supplier");
+            throw new InactiveResourceException(request.name(), "Supplier: " + supplier.getName());
         }
 
         Product product = Product.of(
@@ -71,7 +69,7 @@ public class ProductService {
     public ProductResponse findProduct(UUID id) {
        return productRepository.findById(id)
                 .map(ProductDtoMapper::toDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Cannot find product with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "ID", id.toString()));
     }
 
 
@@ -99,7 +97,7 @@ public class ProductService {
     public ProductResponse updateProduct(UUID id, UpdateProductRequest request) {
 
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cannot find product with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "ID", id.toString()));
 
         if (request.name() != null) {
             updateProductName(product, request.name());
@@ -119,14 +117,14 @@ public class ProductService {
 
         if (request.categoryId() != null) {
             Category category = categoryRepository.findById(request.categoryId())
-                            .orElseThrow(() -> new ResourceNotFoundException("Cannot not find category with ID: " + id));
+                            .orElseThrow(() -> new ResourceNotFoundException("Category", "ID", request.categoryId().toString()));
 
             product.updateCategory(category);
         }
 
         if (request.supplierId() != null) {
             Supplier supplier = supplierRepository.findById(request.supplierId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Cannot not find supplier with ID: " + id));
+                    .orElseThrow(() -> new ResourceNotFoundException("Supplier", "ID", request.supplierId().toString()));
 
             product.updateSupplier(supplier);
         }
@@ -139,13 +137,11 @@ public class ProductService {
     private void updateProductName(Product product, String name) {
         String newProductName = name.trim();
 
-        if (product.getName().equals(newProductName)) {
-            throw new DuplicateResourceException("The name " + newProductName + " is already in use.");
-        }
-
         // Check before writing to DB
-        if (productRepository.findByName(newProductName).isPresent()) {
-            throw new DuplicateResourceException("The name " + newProductName + " is already in use.");
+        if (product.getName().equals(newProductName) ||
+                productRepository.findByName(newProductName).isPresent()
+        ) {
+            throw new DuplicateResourceException("Product", "name", newProductName);
         }
 
         product.updateName(newProductName);
@@ -154,7 +150,7 @@ public class ProductService {
     @Transactional
     public void softDelete(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cannot not find product with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "ID", id.toString()));
 
         product.softDelete();
 

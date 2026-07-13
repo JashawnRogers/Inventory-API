@@ -1,6 +1,6 @@
 package com.jashawn.inventory_api.category;
 
-import com.jashawn.inventory_api.Exceptions.InvalidStateException;
+import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
 import com.jashawn.inventory_api.Exceptions.ResourceNotFoundException;
 import com.jashawn.inventory_api.category.dto.CategoryDtoMapper;
 import com.jashawn.inventory_api.category.dto.CategoryResponse;
@@ -26,12 +26,12 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryResponse findCategoryById(UUID id) {
         if (id == null) {
-            throw new InvalidStateException("Missing category ID.");
+            throw new InvalidFieldException("Category", "ID", "null");
         }
 
         return categoryRepository.findById(id)
                 .map(CategoryDtoMapper::toDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "ID",  id.toString()));
     }
 
     @Transactional(readOnly = true)
@@ -56,7 +56,7 @@ public class CategoryService {
     @Transactional
     public CategoryResponse updateCategory(UUID id, UpdateCategoryRequest dto) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "ID", id.toString()));
 
         if (dto.name() != null) {
             category.updateName(dto.name());
@@ -82,7 +82,7 @@ public class CategoryService {
     @Transactional
     public void deleteCategory(UUID id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "ID", id.toString()));
 
         category.softDelete();
 

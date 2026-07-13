@@ -1,6 +1,6 @@
 package com.jashawn.inventory_api.supplier;
 
-import com.jashawn.inventory_api.Exceptions.InvalidStateException;
+import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
 import com.jashawn.inventory_api.util.ValidationUtils;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -50,15 +50,19 @@ public class Supplier {
 
     public static Supplier create(String name, String email, String phone) {
         if (name == null || name.isBlank()) {
-            throw new InvalidStateException("Missing name.");
+            throw new InvalidFieldException(name, "Supplier", "name");
         }
 
-        if (!ValidationUtils.isValidUSPhone(phone)) {
-            throw new InvalidStateException("Invalid phone number");
+        if (phone != null && !ValidationUtils.isValidUSPhone(phone)) {
+            throw new InvalidFieldException(phone, "Supplier", "phone");
+        } else if (phone == null) {
+            throw new InvalidFieldException("null", "Supplier", "phone");
         }
 
-        if (!ValidationUtils.isValidEmail(email)) {
-            throw new InvalidStateException("Invalid email.");
+        if (email != null && !ValidationUtils.isValidEmail(email)) {
+            throw new InvalidFieldException(email, "Supplier", "email");
+        } else if (email == null) {
+            throw new InvalidFieldException("null", "Supplier", "email");
         }
 
         String formattedPhone = ValidationUtils.formatPhone(phone);
@@ -68,7 +72,7 @@ public class Supplier {
 
     public void updateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new InvalidStateException("Invalid name.");
+            throw new InvalidFieldException(name, "Supplier", "name");
         }
 
         this.name = name.trim();
@@ -76,7 +80,7 @@ public class Supplier {
 
     public void updateEmail(String email) {
         if (!ValidationUtils.isValidEmail(email)) {
-            throw new InvalidStateException("Invalid email.");
+            throw new InvalidFieldException(email, "Supplier", "email");
         }
 
         this.email = email;
@@ -84,7 +88,7 @@ public class Supplier {
 
     public void updatePhone(String phone) {
         if (!ValidationUtils.isValidUSPhone(phone)) {
-            throw new InvalidStateException("Invalid email.");
+            throw new InvalidFieldException(phone, "Supplier", "phone");
         }
 
         this.email = ValidationUtils.formatPhone(phone).trim();

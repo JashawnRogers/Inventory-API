@@ -1,6 +1,6 @@
 package com.jashawn.inventory_api.supplier;
 
-import com.jashawn.inventory_api.Exceptions.InvalidStateException;
+import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
 import com.jashawn.inventory_api.Exceptions.ResourceNotFoundException;
 import com.jashawn.inventory_api.supplier.dto.CreateSupplierRequest;
 import com.jashawn.inventory_api.supplier.dto.SupplierDtoMapper;
@@ -36,7 +36,7 @@ public class SupplierService {
     @Transactional(readOnly = true)
     public SupplierResponse findSupplier(UUID id) {
         Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "ID", id.toString()));
 
         return SupplierDtoMapper.toDto(supplier);
     }
@@ -49,7 +49,7 @@ public class SupplierService {
                                                    PageRequest pageRequest
     ) {
         if (phone != null && !ValidationUtils.isValidUSPhone(phone)) {
-            throw new InvalidStateException("Invalid US phone number.");
+            throw new InvalidFieldException(phone, "Supplier", "phone");
         }
 
         // Email validation here too?
@@ -67,7 +67,7 @@ public class SupplierService {
     @Transactional
     public SupplierResponse updateSupplier(UUID id, UpdateSupplierRequest request) {
         Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "ID", id.toString()));
 
         if (request.name() != null) {
             supplier.updateName(request.name());
@@ -97,7 +97,7 @@ public class SupplierService {
     @Transactional
     public void softDelete(UUID id) {
         Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "ID", id.toString()));
 
         supplier.softDelete();
 

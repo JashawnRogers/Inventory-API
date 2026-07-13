@@ -1,9 +1,6 @@
 package com.jashawn.inventory_api.product;
 
-import com.jashawn.inventory_api.Exceptions.BusinessRuleViolationException;
-import com.jashawn.inventory_api.Exceptions.DuplicateResourceException;
-import com.jashawn.inventory_api.Exceptions.InactiveResourceException;
-import com.jashawn.inventory_api.Exceptions.InvalidStateException;
+import com.jashawn.inventory_api.Exceptions.*;
 import com.jashawn.inventory_api.category.Category;
 import com.jashawn.inventory_api.supplier.Supplier;
 import jakarta.persistence.*;
@@ -74,7 +71,7 @@ public class Product {
             Supplier supplier
     ) {
         if (name == null || !name.isBlank()) {
-            throw new InvalidStateException("Missing name. Unable to create a product without a name.");
+            throw new InvalidFieldException(name, "Product", "name");
         } else {
             this.name = name.trim();
         }
@@ -84,25 +81,25 @@ public class Product {
         }
 
         if (unitCost.compareTo(BigDecimal.ZERO) < 0) {
-            throw new InvalidStateException("Unit cost must be at least $0.00.");
+            throw new InvalidFieldException("$" + unitCost, "Product", "unitCost");
         } else {
             this.unitCost = unitCost;
         }
 
         if (reorderPoint < 0) {
-            throw new InvalidStateException("Re-order threshold cannot be negative.");
+            throw new InvalidFieldException(reorderPoint.toString(), "Product", "reorderPoint");
         } else {
             this.reorderPoint = reorderPoint;
         }
 
         if (category == null) {
-            throw new InvalidStateException("Missing category. Unable to create a product without a category.");
+            throw new InvalidFieldException("null", "Product", "category");
         } else {
             this.category = category;
         }
 
         if (supplier == null) {
-            throw new InvalidStateException("Missing supplier. Unable to create a product without a supplier.");
+            throw new InvalidFieldException("null", "Product", "supplier");
         } else {
             this.supplier = supplier;
         }
@@ -129,21 +126,21 @@ public class Product {
         return !this.isActive && this.deletedAt != null;
     }
 
-    public void updateReorderPoint(int reorderPoint) {
+    public void updateReorderPoint(int value) {
         if (canBeUpdated()) {
-            throw new BusinessRuleViolationException("Product is inactive. Cannot perform update.");
+            throw new InvalidFieldException(String.valueOf(value), "Product", "reorderPoint");
         }
 
-        if (reorderPoint < 0) {
-            throw new InvalidStateException("Re-order threshold cannot be negative.");
+        if (value < 0) {
+            throw new InvalidFieldException(String.valueOf(value), "Product", "reorderPoint");
         }
 
-        this.reorderPoint = reorderPoint;
+        this.reorderPoint = value;
     }
 
     public void updateUnitCost(BigDecimal unitCost) {
         if (unitCost != null && unitCost.compareTo(BigDecimal.ZERO) > 0) {
-            throw new InvalidStateException("Unit cost must be at least $0.00");
+            throw new InvalidFieldException("$" + unitCost, "Product", "unitCost");
         }
 
         this.unitCost = unitCost;
@@ -151,7 +148,7 @@ public class Product {
 
     public void updateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new InvalidStateException("Missing product name.");
+            throw new InvalidFieldException(name, "Product", "name");
         }
 
         this.name = name;
@@ -167,16 +164,15 @@ public class Product {
 
     public void updateCategory(Category category) {
         if (canBeUpdated()) {
-            throw new BusinessRuleViolationException("Product is inactive. Cannot perform update.");
+            throw new InvalidStateException("Product", category.getName(), "DELETED");
         }
 
         if (!category.isActive()) {
-            throw new InactiveResourceException(
-                    "Category " + category.getName() + " is inactive and cannot be assigned to products.");
+            throw new InvalidStateException("Product", category.getName(), "inactive");
         }
 
         if (category.getId().equals(this.category.getId())) {
-            throw new DuplicateResourceException("Category already exists.");
+            return;
         }
 
         this.category = category;
@@ -184,16 +180,15 @@ public class Product {
 
     public void updateSupplier(Supplier supplier) {
         if (canBeUpdated()) {
-            throw new BusinessRuleViolationException("Product is inactive. Cannot perform update.");
+            throw new InvalidStateException("Product", supplier.getName(), "DELETED");
         }
 
         if (!supplier.isActive()) {
-            throw new InactiveResourceException(
-                    "Supplier " + supplier.getName() + " is inactive and cannot be assigned to products.");
+            throw new InactiveResourceException(this.name, "Supplier: " + supplier.getName());
         }
 
         if (supplier.getId().equals(this.supplier.getId())) {
-            throw new DuplicateResourceException("Supplier already exists.");
+            return;
         }
 
         this.supplier = supplier;
