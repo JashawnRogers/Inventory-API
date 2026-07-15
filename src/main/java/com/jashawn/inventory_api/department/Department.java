@@ -1,4 +1,4 @@
-package com.jashawn.inventory_api.warehouse;
+package com.jashawn.inventory_api.department;
 
 import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
 import jakarta.persistence.*;
@@ -9,18 +9,18 @@ import java.util.UUID;
 
 @Getter
 @Entity
-@Table(name = "warehouse")
-public class Warehouse {
+@Table(name = "department")
+public class Department {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "name", nullable = false, unique = true)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @Column(name = "location", nullable = false, unique = true)
-    private String location;
+    @Column(name = "code", unique = true, nullable = false)
+    private String code;
 
     @Column(name = "active", nullable = false)
     private boolean active;
@@ -34,47 +34,51 @@ public class Warehouse {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    protected Warehouse() {}
+    protected Department() {}
 
-    private Warehouse(String name, String location) {
+    private Department(String name, String code) {
         this.name = name;
-        this.location = location;
+        this.code = code;
     }
 
-    public Warehouse create(String name, String location) {
+    public Department create(String name, String code) {
         if (name == null || name.isBlank()) {
-            throw new InvalidFieldException("Warehouse", "name", "null or blank");
+            throw new InvalidFieldException("Department", "name", "null or blank");
         }
 
-        if (location == null || location.isBlank()) {
-            throw new InvalidFieldException("Warehouse", "location", "null or blank");
+        if (code == null || code.isBlank()) {
+            throw new InvalidFieldException("Department", "name", "null or blank");
         }
 
-        return new Warehouse(name.trim(), location.trim());
+        return new Department(name.trim(), code.trim());
     }
 
     public void updateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new InvalidFieldException("Warehouse", "name", "null or blank");
+            throw new InvalidFieldException("Department", "name", "null or blank");
         }
 
-        if (name.trim().equals(this.name)) {
+        String normalizedName = name.trim();
+
+        if (normalizedName.equals(this.name)) {
             return;
         }
 
-        this.name = name.trim();
+        this.name = normalizedName;
     }
 
-    public void updateLocation(String location) {
-        if (location == null || location.isBlank()) {
-            throw new InvalidFieldException("Warehouse", "location", "null or blank");
+    public void updateCode(String code) {
+        if (code == null || code.isBlank()) {
+            throw new InvalidFieldException("Department", "code", "null or blank");
         }
 
-        if (location.trim().equals(this.location)) {
+        String normalizedCode = code.trim();
+
+        if (normalizedCode.equals(this.code)) {
             return;
         }
 
-        this.location = location.trim();
+        this.code = normalizedCode;
     }
 
     public void activate() {
