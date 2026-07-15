@@ -3,13 +3,11 @@ package com.jashawn.inventory_api.supplier;
 import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
 import com.jashawn.inventory_api.util.ValidationUtils;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Builder
 @Getter
 @Entity
 @Table(name = "suppliers")

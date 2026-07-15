@@ -3,13 +3,11 @@ package com.jashawn.inventory_api.category;
 import com.jashawn.inventory_api.Exceptions.DuplicateResourceException;
 import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Builder
 @Getter
 @Entity
 @Table(name = "categories")

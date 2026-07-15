@@ -6,7 +6,6 @@ import com.jashawn.inventory_api.supplier.Supplier;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -14,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-@Builder
 @Entity
 @Table(name = "products")
 public class Product {
