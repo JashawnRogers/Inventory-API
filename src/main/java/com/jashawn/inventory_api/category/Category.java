@@ -60,7 +60,7 @@ public class Category {
         }
 
         if (this.name.equals(name)) {
-            throw new DuplicateResourceException("Category", "name", name);
+            return;
         }
 
         this.name = name.trim();

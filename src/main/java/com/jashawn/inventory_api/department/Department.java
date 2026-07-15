@@ -43,11 +43,11 @@ public class Department {
 
     public Department create(String name, String code) {
         if (name == null || name.isBlank()) {
-            throw new InvalidFieldException("Department", "name", "null or blank");
+            throw new InvalidFieldException("null or blank", "Department", "name");
         }
 
         if (code == null || code.isBlank()) {
-            throw new InvalidFieldException("Department", "name", "null or blank");
+            throw new InvalidFieldException("null or blank", "Department", "code");
         }
 
         return new Department(name.trim(), code.trim());
@@ -55,7 +55,7 @@ public class Department {
 
     public void updateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new InvalidFieldException("Department", "name", "null or blank");
+            throw new InvalidFieldException("null or blank", "Department", "name");
         }
 
         String normalizedName = name.trim();
@@ -69,7 +69,7 @@ public class Department {
 
     public void updateCode(String code) {
         if (code == null || code.isBlank()) {
-            throw new InvalidFieldException("Department", "code", "null or blank");
+            throw new InvalidFieldException("null or blank", "Department", "code");
         }
 
         String normalizedCode = code.trim();

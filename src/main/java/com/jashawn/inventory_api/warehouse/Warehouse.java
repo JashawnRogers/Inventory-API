@@ -43,11 +43,11 @@ public class Warehouse {
 
     public Warehouse create(String name, String location) {
         if (name == null || name.isBlank()) {
-            throw new InvalidFieldException("Warehouse", "name", "null or blank");
+            throw new InvalidFieldException("null or blank", "Warehouse", "name");
         }
 
         if (location == null || location.isBlank()) {
-            throw new InvalidFieldException("Warehouse", "location", "null or blank");
+            throw new InvalidFieldException("null or blank", "Warehouse", "location");
         }
 
         return new Warehouse(name.trim(), location.trim());
@@ -55,7 +55,7 @@ public class Warehouse {
 
     public void updateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new InvalidFieldException("Warehouse", "name", "null or blank");
+            throw new InvalidFieldException("null or blank", "Warehouse", "name");
         }
 
         if (name.trim().equals(this.name)) {
@@ -67,7 +67,7 @@ public class Warehouse {
 
     public void updateLocation(String location) {
         if (location == null || location.isBlank()) {
-            throw new InvalidFieldException("Warehouse", "location", "null or blank");
+            throw new InvalidFieldException("null or blank", "Warehouse", "location");
         }
 
         if (location.trim().equals(this.location)) {
