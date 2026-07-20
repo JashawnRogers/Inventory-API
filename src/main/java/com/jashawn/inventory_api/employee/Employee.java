@@ -122,7 +122,7 @@ public class Employee {
         this.email = normalizedEmail;
     }
 
-    public void updatedDepartment(Department department) {
+    public void updateDepartment(Department department) {
         if (department == null) {
             throw new InvalidFieldException("null", "Employee", "department");
         }
