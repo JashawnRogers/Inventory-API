@@ -41,7 +41,7 @@ public class Warehouse {
         this.location = location;
     }
 
-    public Warehouse create(String name, String location) {
+    public static Warehouse create(String name, String location) {
         if (name == null || name.isBlank()) {
             throw new InvalidFieldException("null or blank", "Warehouse", "name");
         }
