@@ -154,6 +154,10 @@ public class Employee {
         this.deletedAt = LocalDateTime.now();
     }
 
+    public String getFullName() {
+        return getFirstName() + " " + getLastName();
+    }
+
     @PrePersist
     private void initialize() {
         this.active = true;
