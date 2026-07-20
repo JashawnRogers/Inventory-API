@@ -41,7 +41,7 @@ public class Department {
         this.code = code;
     }
 
-    public Department create(String name, String code) {
+    public static Department create(String name, String code) {
         if (name == null || name.isBlank()) {
             throw new InvalidFieldException("null or blank", "Department", "name");
         }
