@@ -136,6 +136,10 @@ public class StockItem {
         this.reservedQuantity -= quantity;
     }
 
+    public int getAvailableQuantity() {
+        return getQuantityOnHand() - getReservedQuantity();
+    }
+
     private void validatePositiveQuantity(int quantity) {
         if (quantity < 0) {
             throw new BusinessRuleViolationException("Stock issue operation", "quantity", "less than 0");

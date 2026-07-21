@@ -1,6 +1,7 @@
 package com.jashawn.inventory_api.warehouse;
 
 import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
+import com.jashawn.inventory_api.common.ActiveStateEnforcer;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "warehouse")
-public class Warehouse {
+public class Warehouse implements ActiveStateEnforcer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

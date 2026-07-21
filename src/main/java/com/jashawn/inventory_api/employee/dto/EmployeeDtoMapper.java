@@ -10,7 +10,12 @@ public class EmployeeDtoMapper {
                 employee.getLastName(),
                 employee.getFullName(),
                 employee.getEmail(),
-                employee.getDepartment().getId()
+                employee.getDepartment().getId(),
+                employee.isActive()
         );
+    }
+
+    public static EmployeeSummary toSummary(Employee employee) {
+        return new EmployeeSummary(employee.getFullName(), employee.getDepartment().getCode());
     }
 }

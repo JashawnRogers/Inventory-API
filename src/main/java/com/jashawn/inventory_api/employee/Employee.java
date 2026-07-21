@@ -2,6 +2,7 @@ package com.jashawn.inventory_api.employee;
 
 import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
 import com.jashawn.inventory_api.Exceptions.InvalidStateException;
+import com.jashawn.inventory_api.common.ActiveStateEnforcer;
 import com.jashawn.inventory_api.department.Department;
 import com.jashawn.inventory_api.util.ValidationUtils;
 import jakarta.persistence.*;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "employee")
-public class Employee {
+public class Employee implements ActiveStateEnforcer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

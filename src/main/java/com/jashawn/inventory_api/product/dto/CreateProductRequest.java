@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public record CreateProductRequest(
         String name,
+        String sku,
         String description,
         BigDecimal unitCost,
         Integer reorderPoint,

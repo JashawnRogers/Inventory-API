@@ -51,14 +51,14 @@ public class ProductService {
             throw new InactiveResourceException(request.name(), "Supplier: " + supplier.getName());
         }
 
-        Product product = Product.of(
+        Product product = Product.create(
                 request.name(),
+                request.sku(),
                 request.description(),
                 request.unitCost(),
                 request.reorderPoint(),
                 category,
-                supplier
-        );
+                supplier);
 
         Product saved = productRepository.save(product);
 

@@ -66,6 +66,7 @@ public class StockMovement {
     private StockMovement(Product product,
                           Warehouse warehouse,
                           Employee employee,
+                          Department receivingDepartment,
                           MovementType movementType,
                           int quantity,
                           BigDecimal unitCostAtMovement,
@@ -76,6 +77,7 @@ public class StockMovement {
         this.product = product;
         this.warehouse = warehouse;
         this.employee = employee;
+        this.department = receivingDepartment;
         this.movementType = movementType;
         this.quantity = quantity;
         this.unitCostAtMovement = unitCostAtMovement;
@@ -88,10 +90,10 @@ public class StockMovement {
             Product product,
             Warehouse warehouse,
             Employee employee,
+            Department receivingDepartment,
             MovementType movementType,
             int quantity,
             BigDecimal unitCostAtMovement,
-            BigDecimal totalCost,
             String reason,
             String reference
     ) {
@@ -131,10 +133,6 @@ public class StockMovement {
             throw new InvalidFieldException("null", "StockMovement", "unitCostAtMovement");
         }
 
-        if (totalCost == null) {
-            throw new InvalidFieldException("null", "StockMovement", "totalCost");
-        }
-
         if (reason == null || reason.isBlank()) {
             throw new InvalidFieldException(String.valueOf(reason), "StockMovement", "reason");
         }
@@ -143,10 +141,13 @@ public class StockMovement {
             throw new InvalidFieldException(String.valueOf(reference), "StockMovement", "reference");
         }
 
+        BigDecimal totalCost = unitCostAtMovement.multiply(BigDecimal.valueOf(quantity));
+
         return new StockMovement(
                 product,
                 warehouse,
                 employee,
+                receivingDepartment,
                 movementType,
                 quantity,
                 unitCostAtMovement,

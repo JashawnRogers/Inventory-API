@@ -14,4 +14,8 @@ public class WarehouseDtoMapper {
                 warehouse.getUpdatedAt()
         );
     }
+
+    public static WarehouseSummary toSummaryDto(Warehouse warehouse) {
+        return new WarehouseSummary(warehouse.getId(), warehouse.getName(), warehouse.getLocation());
+    }
 }

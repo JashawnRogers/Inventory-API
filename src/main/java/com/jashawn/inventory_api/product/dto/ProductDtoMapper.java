@@ -22,4 +22,12 @@ public class ProductDtoMapper {
                 product.getUpdatedAt()
         );
     }
+
+    public static ProductSummary toSummaryDto(Product product) {
+        return new ProductSummary(
+                product.getId(),
+                product.getName(),
+                product.getSku()
+        );
+    }
 }

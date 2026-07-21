@@ -2,6 +2,7 @@ package com.jashawn.inventory_api.product;
 
 import com.jashawn.inventory_api.Exceptions.*;
 import com.jashawn.inventory_api.category.Category;
+import com.jashawn.inventory_api.common.ActiveStateEnforcer;
 import com.jashawn.inventory_api.supplier.Supplier;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
@@ -15,14 +16,14 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "products")
-public class Product {
+public class Product implements ActiveStateEnforcer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "sku", nullable = false, unique = true)
-    private UUID sku;
+    private String sku;
 
     @Column(name = "name", length = 25, nullable = false, unique = true)
     private String name;
@@ -38,8 +39,8 @@ public class Product {
     @Min(value = 0, message = "The product re-order threshold must be at least 0.")
     private Integer reorderPoint;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    @Column(name = "active", nullable = false)
+    private boolean active;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -62,6 +63,7 @@ public class Product {
 
     private Product(
             String name,
+            String sku,
             String description,
             BigDecimal unitCost,
             Integer reorderPoint,
@@ -72,6 +74,12 @@ public class Product {
             throw new InvalidFieldException(name, "Product", "name");
         } else {
             this.name = name.trim();
+        }
+
+        if (sku == null || !sku.isBlank()) {
+            throw new InvalidFieldException(sku, "Product", "sku");
+        } else {
+            this.sku = sku.trim();
         }
 
         if (description != null) {
@@ -103,7 +111,8 @@ public class Product {
         }
     }
 
-    public static Product of(String name,
+    public static Product create(String name,
+                             String sku,
                              String description,
                              BigDecimal unitCost,
                              Integer reorderPoint,
@@ -112,6 +121,7 @@ public class Product {
     ) {
         return new Product(
                 name,
+                sku,
                 description,
                 unitCost,
                 reorderPoint,
@@ -121,7 +131,7 @@ public class Product {
     }
 
     public boolean canBeUpdated() {
-        return !this.isActive && this.deletedAt != null;
+        return !this.active && this.deletedAt != null;
     }
 
     public void updateReorderPoint(int value) {
@@ -193,17 +203,13 @@ public class Product {
     }
 
     public void softDelete() {
-        this.isActive = false;
+        this.active = false;
         this.deletedAt = LocalDateTime.now();
     }
 
     @PrePersist
     private void initialize() {
-        if (sku == null) {
-            this.sku = UUID.randomUUID();
-        }
-
-        this.isActive = true;
+        this.active = true;
         this.createdAt = LocalDateTime.now();
     }
 

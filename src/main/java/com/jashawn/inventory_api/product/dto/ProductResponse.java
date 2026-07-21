@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public record ProductResponse(
         UUID id,
-        UUID sku,
+        String sku,
         String name,
         String description,
         BigDecimal unitCost,

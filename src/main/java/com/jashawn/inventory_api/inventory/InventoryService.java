@@ -1,0 +1,82 @@
+package com.jashawn.inventory_api.inventory;
+
+import com.jashawn.inventory_api.Exceptions.ResourceNotFoundException;
+import com.jashawn.inventory_api.employee.Employee;
+import com.jashawn.inventory_api.employee.EmployeeRepository;
+import com.jashawn.inventory_api.inventory.dto.ReceiveInventoryRequest;
+import com.jashawn.inventory_api.product.Product;
+import com.jashawn.inventory_api.product.ProductRepository;
+import com.jashawn.inventory_api.product.dto.ProductDtoMapper;
+import com.jashawn.inventory_api.stockItem.MovementType;
+import com.jashawn.inventory_api.stockItem.StockItem;
+import com.jashawn.inventory_api.stockItem.StockItemRepository;
+import com.jashawn.inventory_api.stockItem.dto.StockItemDtoMapper;
+import com.jashawn.inventory_api.stockItem.dto.StockItemResponse;
+import com.jashawn.inventory_api.stockMovement.StockMovement;
+import com.jashawn.inventory_api.stockMovement.StockMovementRepository;
+import com.jashawn.inventory_api.warehouse.Warehouse;
+import com.jashawn.inventory_api.warehouse.WarehouseRepository;
+import com.jashawn.inventory_api.warehouse.dto.WarehouseDtoMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class InventoryService {
+
+    private final StockItemRepository stockItemRepository;
+    private final StockMovementRepository stockMovementRepository;
+    private final WarehouseRepository warehouseRepository;
+    private final ProductRepository productRepository;
+    private final EmployeeRepository employeeRepository;
+
+    public InventoryService(StockItemRepository stockItemRepository,
+                            StockMovementRepository stockMovementRepository,
+                            WarehouseRepository warehouseRepository,
+                            ProductRepository productRepository,
+                            EmployeeRepository employeeRepository) {
+        this.stockItemRepository = stockItemRepository;
+        this.stockMovementRepository = stockMovementRepository;
+        this.warehouseRepository = warehouseRepository;
+        this.productRepository = productRepository;
+        this.employeeRepository = employeeRepository;
+    }
+
+    @Transactional
+    public StockItemResponse receive(ReceiveInventoryRequest request) {
+        Product product = productRepository.findById(request.productId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "ID", request.productId().toString()));
+
+        Warehouse warehouse = warehouseRepository.findById(request.warehouseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse", "ID", request.warehouseId().toString()));
+
+        Employee performedBy = employeeRepository.findById(request.employeeId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Employee", "ID", request.employeeId().toString()));
+
+        product.enforceActiveState("Product");
+        warehouse.enforceActiveState("Warehouse");
+        performedBy.enforceActiveState("Employee");
+
+        StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
+                .orElseGet(() ->StockItem.create(product, warehouse, 0, 0));
+
+        stockItem.receive(request.quantity());
+        stockItemRepository.save(stockItem);
+
+        StockMovement stockMovement = StockMovement.create(product,
+                warehouse,
+                performedBy,
+                null,
+                MovementType.RECEIVE,
+                request.quantity(),
+                product.getUnitCost(),
+                request.reason(),
+                request.reference());
+
+        stockMovementRepository.save(stockMovement);
+
+        return StockItemDtoMapper.toDto(stockItem,
+                ProductDtoMapper.toSummaryDto(product),
+                WarehouseDtoMapper.toSummaryDto(warehouse)
+        );
+    }
+}
