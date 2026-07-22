@@ -7,7 +7,6 @@ import com.jashawn.inventory_api.inventory.dto.ReceiveInventoryRequest;
 import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.product.ProductRepository;
 import com.jashawn.inventory_api.product.dto.ProductDtoMapper;
-import com.jashawn.inventory_api.stockItem.MovementType;
 import com.jashawn.inventory_api.stockItem.StockItem;
 import com.jashawn.inventory_api.stockItem.StockItemRepository;
 import com.jashawn.inventory_api.stockItem.dto.StockItemDtoMapper;
@@ -57,20 +56,18 @@ public class InventoryService {
         performedBy.enforceActiveState("Employee");
 
         StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
-                .orElseGet(() ->StockItem.create(product, warehouse, 0, 0));
+                .orElseGet(() -> StockItem.create(product, warehouse, 0, 0));
 
         stockItem.receive(request.quantity());
         stockItemRepository.save(stockItem);
 
-        StockMovement stockMovement = StockMovement.create(product,
-                warehouse,
+        StockMovement stockMovement = StockMovement.receive(stockItem,
                 performedBy,
-                null,
-                MovementType.RECEIVE,
                 request.quantity(),
                 product.getUnitCost(),
                 request.reason(),
-                request.reference());
+                request.reference()
+        );
 
         stockMovementRepository.save(stockMovement);
 

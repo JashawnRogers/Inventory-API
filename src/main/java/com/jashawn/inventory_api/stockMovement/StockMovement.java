@@ -1,12 +1,10 @@
 package com.jashawn.inventory_api.stockMovement;
 
 import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
-import com.jashawn.inventory_api.Exceptions.InvalidStateException;
 import com.jashawn.inventory_api.department.Department;
 import com.jashawn.inventory_api.employee.Employee;
-import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.stockItem.MovementType;
-import com.jashawn.inventory_api.warehouse.Warehouse;
+import com.jashawn.inventory_api.stockItem.StockItem;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -24,19 +22,15 @@ public class StockMovement {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "warehouse_id", nullable = false)
-    private Warehouse warehouse;
+    @JoinColumn(name = "stock_item_id", nullable = false)
+    private StockItem stockItem;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "department_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
     private Department department;
 
     @Column(name = "movement_type", nullable = false)
@@ -63,8 +57,7 @@ public class StockMovement {
 
     protected StockMovement() {}
 
-    private StockMovement(Product product,
-                          Warehouse warehouse,
+    private StockMovement(StockItem stockItem,
                           Employee employee,
                           Department receivingDepartment,
                           MovementType movementType,
@@ -74,8 +67,7 @@ public class StockMovement {
                           String reason,
                           String reference
     ) {
-        this.product = product;
-        this.warehouse = warehouse;
+        this.stockItem = stockItem;
         this.employee = employee;
         this.department = receivingDepartment;
         this.movementType = movementType;
@@ -85,44 +77,18 @@ public class StockMovement {
         this.reason = reason;
         this.reference = reference;
     }
-
-    public static StockMovement create(
-            Product product,
-            Warehouse warehouse,
-            Employee employee,
-            Department receivingDepartment,
-            MovementType movementType,
-            int quantity,
-            BigDecimal unitCostAtMovement,
-            String reason,
-            String reference
-    ) {
-        if (product == null) {
-            throw new InvalidFieldException("null", "StockMovement", "product");
-        }
-
-        if (!product.isActive()) {
-            throw new InvalidStateException("StockMovement", product.getName(), "inactive");
-        }
-
-        if (warehouse == null) {
-            throw new InvalidFieldException("null", "StockMovement", "warehouse");
-        }
-
-        if (!warehouse.isActive()) {
-            throw new InvalidStateException("StockMovement", warehouse.getName(), "inactive");
+    public static StockMovement receive(StockItem stockItem,
+                                        Employee employee,
+                                        int quantity,
+                                        BigDecimal unitCostAtMovement,
+                                        String reason,
+                                        String reference) {
+        if (stockItem == null) {
+            throw new InvalidFieldException("null", "StockMovement", "stockItem");
         }
 
         if (employee == null) {
             throw new InvalidFieldException("null", "StockMovement", "employee");
-        }
-
-        if (!employee.isActive()) {
-            throw new InvalidStateException("StockMovement", employee.getFullName(), "inactive");
-        }
-
-        if (movementType == null) {
-            throw new InvalidFieldException("null", "StockMovement", "movementType");
         }
 
         if (quantity < 0) {
@@ -131,29 +97,30 @@ public class StockMovement {
 
         if (unitCostAtMovement == null) {
             throw new InvalidFieldException("null", "StockMovement", "unitCostAtMovement");
+        } else if (unitCostAtMovement.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidFieldException("$" + unitCostAtMovement, "StockMovement", "unitCostAtMovement");
         }
 
         if (reason == null || reason.isBlank()) {
-            throw new InvalidFieldException(String.valueOf(reason), "StockMovement", "reason");
+            throw new InvalidFieldException(reason, "StockMovement", "reason");
         }
 
         if (reference == null || reference.isBlank()) {
-            throw new InvalidFieldException(String.valueOf(reference), "StockMovement", "reference");
+            throw new InvalidFieldException(reference, "StockMovement", "reference");
         }
 
         BigDecimal totalCost = unitCostAtMovement.multiply(BigDecimal.valueOf(quantity));
 
         return new StockMovement(
-                product,
-                warehouse,
+                stockItem,
                 employee,
-                receivingDepartment,
-                movementType,
+                null,
+                MovementType.RECEIVE,
                 quantity,
                 unitCostAtMovement,
                 totalCost,
-                reason.trim(),
-                reference.trim()
+                reason,
+                reference
         );
     }
 
