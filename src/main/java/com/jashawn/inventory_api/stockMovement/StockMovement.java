@@ -177,6 +177,54 @@ public class StockMovement {
         );
     }
 
+    public static StockMovement reserve(StockItem stockItem,
+                                        Employee performedByEmployee,
+                                        Department reservedForDepartment,
+                                        int quantityReserved,
+                                        String reason,
+                                        String reference) {
+        if (stockItem == null) {
+            throw new InvalidFieldException("null", "StockMovement", "stockItem");
+        }
+
+        if (performedByEmployee == null) {
+            throw new InvalidFieldException("null", "StockMovement", "employee");
+        }
+
+        if (reservedForDepartment == null) {
+            throw new InvalidFieldException("null", "StockMovement", "department");
+        }
+
+        if (quantityReserved <= 0) {
+            throw new InvalidFieldException(String.valueOf(quantityReserved), "StockMovement", "quantity");
+        }
+
+        if (reason == null || reason.isBlank()) {
+            throw new InvalidFieldException(reason, "StockMovement", "reason");
+        }
+
+        if (reference == null || reference.isBlank()) {
+            throw new InvalidFieldException(reference, "StockMovement", "reference");
+        }
+
+        BigDecimal totalCost = stockItem
+                .getProduct()
+                .getUnitCost()
+                .multiply(BigDecimal.valueOf(quantityReserved));
+
+        return new StockMovement(
+                stockItem,
+                performedByEmployee,
+                reservedForDepartment,
+                MovementType.RESERVE,
+                quantityReserved,
+                stockItem.getProduct().getUnitCost(),
+                totalCost,
+                reason,
+                reference
+        );
+    }
+
     @PrePersist
     private void initialize() {
         this.createdAt = LocalDateTime.now();
