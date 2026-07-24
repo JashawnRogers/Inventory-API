@@ -1,4 +1,4 @@
-package com.jashawn.inventory_api.stockItem;
+package com.jashawn.inventory_api.stockMovement;
 
 public enum MovementType {
     RECEIVE,

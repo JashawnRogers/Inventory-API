@@ -1,8 +1,11 @@
 package com.jashawn.inventory_api.inventory;
 
 import com.jashawn.inventory_api.Exceptions.ResourceNotFoundException;
+import com.jashawn.inventory_api.department.Department;
+import com.jashawn.inventory_api.department.DepartmentRepository;
 import com.jashawn.inventory_api.employee.Employee;
 import com.jashawn.inventory_api.employee.EmployeeRepository;
+import com.jashawn.inventory_api.inventory.dto.IssueStockItemRequest;
 import com.jashawn.inventory_api.inventory.dto.ReceiveInventoryRequest;
 import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.product.ProductRepository;
@@ -27,17 +30,20 @@ public class InventoryService {
     private final WarehouseRepository warehouseRepository;
     private final ProductRepository productRepository;
     private final EmployeeRepository employeeRepository;
+    private final DepartmentRepository departmentRepository;
 
     public InventoryService(StockItemRepository stockItemRepository,
                             StockMovementRepository stockMovementRepository,
                             WarehouseRepository warehouseRepository,
                             ProductRepository productRepository,
-                            EmployeeRepository employeeRepository) {
+                            EmployeeRepository employeeRepository,
+                            DepartmentRepository departmentRepository) {
         this.stockItemRepository = stockItemRepository;
         this.stockMovementRepository = stockMovementRepository;
         this.warehouseRepository = warehouseRepository;
         this.productRepository = productRepository;
         this.employeeRepository = employeeRepository;
+        this.departmentRepository = departmentRepository;
     }
 
     @Transactional
@@ -65,6 +71,54 @@ public class InventoryService {
                 performedBy,
                 request.quantity(),
                 product.getUnitCost(),
+                request.reason(),
+                request.reference()
+        );
+
+        stockMovementRepository.save(stockMovement);
+
+        return StockItemDtoMapper.toDto(stockItem,
+                ProductDtoMapper.toSummaryDto(product),
+                WarehouseDtoMapper.toSummaryDto(warehouse)
+        );
+    }
+
+    @Transactional
+    public StockItemResponse issue(IssueStockItemRequest request) {
+        Product product = productRepository.findById(request.productId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "ID", request.productId().toString()));
+
+        Warehouse warehouse = warehouseRepository.findById(request.warehouseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse", "ID", request.warehouseId().toString()));
+
+        Employee employee = employeeRepository.findById(request.employeeId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Employee", "ID", request.employeeId().toString())
+                );
+
+        Department receivingDepartment = departmentRepository.findById(request.receivingDepartmentId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Department", "ID", request.receivingDepartmentId().toString())
+                );
+
+        product.enforceActiveState("Product");
+        warehouse.enforceActiveState("Warehouse");
+        receivingDepartment.enforceActiveState("Receiving Department");
+        employee.enforceActiveState("Employee");
+
+        StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "StockItem", "product id and warehouse id", product.getId() + " " + warehouse.getId())
+                );
+
+        stockItem.issue(request.quantity());
+
+        StockMovement stockMovement = StockMovement.issue(
+                stockItem,
+                employee,
+                receivingDepartment,
+                product.getUnitCost(),
+                request.quantity(),
                 request.reason(),
                 request.reference()
         );

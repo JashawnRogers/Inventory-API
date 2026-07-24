@@ -3,7 +3,6 @@ package com.jashawn.inventory_api.stockMovement;
 import com.jashawn.inventory_api.Exceptions.InvalidFieldException;
 import com.jashawn.inventory_api.department.Department;
 import com.jashawn.inventory_api.employee.Employee;
-import com.jashawn.inventory_api.stockItem.MovementType;
 import com.jashawn.inventory_api.stockItem.StockItem;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -33,6 +32,7 @@ public class StockMovement {
     @JoinColumn(name = "department_id")
     private Department department;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "movement_type", nullable = false)
     private MovementType movementType;
 
@@ -91,7 +91,7 @@ public class StockMovement {
             throw new InvalidFieldException("null", "StockMovement", "employee");
         }
 
-        if (quantity < 0) {
+        if (quantity <= 0) {
             throw new InvalidFieldException(String.valueOf(quantity), "StockMovement", "quantity");
         }
 
@@ -116,6 +116,59 @@ public class StockMovement {
                 employee,
                 null,
                 MovementType.RECEIVE,
+                quantity,
+                unitCostAtMovement,
+                totalCost,
+                reason,
+                reference
+        );
+    }
+
+    public static StockMovement issue(StockItem stockItem,
+                               Employee employee,
+                               Department receivingDepartment,
+                               BigDecimal unitCostAtMovement,
+                               int quantity,
+                               String reason,
+                               String reference) {
+
+        if (stockItem == null) {
+            throw new InvalidFieldException("null", "StockMovement", "stockItem");
+        }
+
+        if (employee == null) {
+            throw new InvalidFieldException("null", "StockMovement", "employee");
+        }
+
+        if (receivingDepartment == null) {
+            throw new InvalidFieldException("null", "StockMovement", "department");
+        }
+
+        if (quantity <= 0) {
+            throw new InvalidFieldException(String.valueOf(quantity), "StockMovement", "quantity");
+        }
+
+        if (unitCostAtMovement == null) {
+            throw new InvalidFieldException("null", "StockMovement", "unitCostAtMovement");
+        } else if (unitCostAtMovement.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidFieldException("$" + unitCostAtMovement, "StockMovement", "unitCostAtMovement");
+        }
+
+        if (reason == null || reason.isBlank()) {
+            throw new InvalidFieldException(reason, "StockMovement", "reason");
+        }
+
+        if (reference == null || reference.isBlank()) {
+            throw new InvalidFieldException(reference, "StockMovement", "reference");
+        }
+
+        BigDecimal totalCost = unitCostAtMovement.multiply(BigDecimal.valueOf(quantity));
+
+        return new StockMovement(
+                stockItem,
+                employee,
+                receivingDepartment,
+                MovementType.ISSUE,
                 quantity,
                 unitCostAtMovement,
                 totalCost,
