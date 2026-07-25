@@ -236,8 +236,13 @@ public class InventoryService {
         Warehouse warehouse = warehouseRepository.findById(request.warehouseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse", "ID", request.warehouseId().toString()));
 
-        Department department = departmentRepository.findById(request.optionalDepartmentId())
-                .orElse(null);
+        Department department = null;
+        if (request.optionalDepartmentId() != null) {
+            department = departmentRepository.findById(request.optionalDepartmentId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Department", "ID", request.optionalDepartmentId().toString())
+                    );
+        }
 
         Employee employee = employeeRepository.findById(request.performedByEmployeeId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -284,8 +289,13 @@ public class InventoryService {
         Warehouse warehouse = warehouseRepository.findById(request.warehouseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse", "ID", request.warehouseId().toString()));
 
-        Department department = departmentRepository.findById(request.optionalDepartmentId())
-                .orElse(null);
+        Department department = null;
+        if (request.optionalDepartmentId() != null) {
+            department = departmentRepository.findById(request.optionalDepartmentId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Department", "ID", request.optionalDepartmentId().toString())
+                    );
+        }
 
         Employee employee = employeeRepository.findById(request.performedByEmployeeId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -326,7 +336,7 @@ public class InventoryService {
 
     @Transactional
     public StockItemTransferResponse transferBetweenWarehouses(WarehouseTransferRequest request) {
-        if (request.issuingWarehouseId() == request.receivingWarehouseId()) {
+        if (request.issuingWarehouseId().equals(request.receivingWarehouseId())) {
             throw new BusinessRuleViolationException(
                     "Warehouse transfer operation", "Transfers within", "single warehouse"
             );
@@ -367,6 +377,7 @@ public class InventoryService {
 
         issuingStockItem.issue(request.quantity());
         receivingStockItem.receive(request.quantity());
+        stockItemRepository.save(receivingStockItem);
 
         StockMovement transferOutStockMovement = StockMovement.transferOut(
                 issuingStockItem,

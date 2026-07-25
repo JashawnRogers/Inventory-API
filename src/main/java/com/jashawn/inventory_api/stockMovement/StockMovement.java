@@ -39,10 +39,10 @@ public class StockMovement {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(name = "unit_cost", nullable = false)
+    @Column(name = "unit_cost")
     private BigDecimal unitCostAtMovement;
 
-    @Column(name = "total_cost", nullable = false)
+    @Column(name = "total_cost")
     private BigDecimal totalCost;
 
     @Column(name = "reason", nullable = false)
@@ -207,19 +207,14 @@ public class StockMovement {
             throw new InvalidFieldException(reference, "StockMovement", "reference");
         }
 
-        BigDecimal totalCost = stockItem
-                .getProduct()
-                .getUnitCost()
-                .multiply(BigDecimal.valueOf(quantityReserved));
-
         return new StockMovement(
                 stockItem,
                 performedByEmployee,
                 reservedForDepartment,
                 MovementType.RESERVE,
                 quantityReserved,
-                stockItem.getProduct().getUnitCost(),
-                totalCost,
+                null,
+                null,
                 reason,
                 reference
         );
@@ -255,17 +250,14 @@ public class StockMovement {
             throw new InvalidFieldException(reference, "StockMovement", "reference");
         }
 
-        BigDecimal unitCost = stockItem.getProduct().getUnitCost();
-        BigDecimal totalCost = unitCost.multiply(BigDecimal.valueOf(quantityReleased));
-
         return new StockMovement(
                 stockItem,
                 performedByEmployee,
                 releasedToDepartment,
                 MovementType.RELEASE_RESERVATION,
                 quantityReleased,
-                unitCost,
-                totalCost,
+                null,
+                null,
                 reason,
                 reference
         );
@@ -327,7 +319,7 @@ public class StockMovement {
             throw new InvalidFieldException("null", "StockMovement", "employee");
         }
 
-        if (quantity >= 0) {
+        if (quantity <= 0) {
             throw new InvalidFieldException(String.valueOf(quantity), "StockMovement", "quantity");
         }
 

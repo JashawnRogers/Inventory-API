@@ -81,6 +81,10 @@ public class StockItem {
             throw new InvalidFieldException(String.valueOf(quantityOnHand), "StockItem", "quantityOnHand");
         }
 
+        if (reservedQuantity < 0) {
+            throw new InvalidFieldException(String.valueOf(reservedQuantity), "StockItem", "reservedQuantity");
+        }
+
         if (reservedQuantity > quantityOnHand) {
             throw new InvalidFieldException(reservedQuantity + " > quantityOnHand", "StockItem", "reservedQuantity");
         }
@@ -102,8 +106,8 @@ public class StockItem {
     public void issue(int quantity) {
         validatePositiveQuantity(quantity);
 
-        if (quantity > getQuantityOnHand()) {
-            throw new InsufficientAvailableStockException(getId(), quantity, getQuantityOnHand());
+        if (quantity > getAvailableQuantity()) {
+            throw new InsufficientAvailableStockException(getId(), quantity, getAvailableQuantity());
         }
 
         this.quantityOnHand -= quantity;
@@ -117,8 +121,8 @@ public class StockItem {
     public void reserve(int quantity) {
         validatePositiveQuantity(quantity);
 
-        if (quantity > getQuantityOnHand()) {
-            throw new InsufficientAvailableStockException(getId(), quantity, getQuantityOnHand());
+        if (quantity > getAvailableQuantity()) {
+            throw new InsufficientAvailableStockException(getId(), quantity, getAvailableQuantity());
         }
 
         this.reservedQuantity += quantity;
@@ -142,10 +146,12 @@ public class StockItem {
     }
 
     public void decreaseByAdjustment(int quantity) {
-        validateNegativeQuantity(quantity);
+        validatePositiveQuantity(quantity);
 
-        if ((getQuantityOnHand() - quantity) < 0) {
-            throw new BusinessRuleViolationException("Stock adjustment operation", "quantity on hand", "less than 0");
+        if (quantity > getAvailableQuantity()) {
+            throw new BusinessRuleViolationException(
+                    "Stock adjustment operation", "requested quantity", "greater than available quantity"
+            );
         }
 
         this.quantityOnHand -= quantity;
@@ -158,14 +164,6 @@ public class StockItem {
     private void validatePositiveQuantity(int quantity) {
         if (quantity <= 0) {
             throw new BusinessRuleViolationException("Stock issue operation", "quantity", "less than or equal to 0");
-        }
-    }
-
-    private void validateNegativeQuantity(int quantity) {
-        if (quantity >= 0) {
-            throw new BusinessRuleViolationException(
-                    "Stock issue operation", "quantity", "greater than or equal to 0"
-            );
         }
     }
 
