@@ -147,6 +147,8 @@ public class StockItem {
         if ((getQuantityOnHand() - quantity) < 0) {
             throw new BusinessRuleViolationException("Stock adjustment operation", "quantity on hand", "less than 0");
         }
+
+        this.quantityOnHand -= quantity;
     }
 
     public int getAvailableQuantity() {

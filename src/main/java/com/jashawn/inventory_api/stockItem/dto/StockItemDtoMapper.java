@@ -18,4 +18,24 @@ public class StockItemDtoMapper {
                 stockItem.getAvailableQuantity()
         );
     }
+
+    public static StockItemTransferResponse toTransferResponse(StockItem issuingStockItem,
+                                                               ProductSummary product,
+                                                               WarehouseSummary issuingWarehouse,
+                                                               StockItem receivingStockItem,
+                                                               WarehouseSummary receivingWarehouse) {
+        return new StockItemTransferResponse(
+                issuingStockItem.getId(),
+                product,
+                issuingWarehouse,
+                issuingStockItem.getQuantityOnHand(),
+                issuingStockItem.getReservedQuantity(),
+                issuingStockItem.getAvailableQuantity(),
+                receivingStockItem.getId(),
+                receivingWarehouse,
+                receivingStockItem.getQuantityOnHand(),
+                receivingStockItem.getReservedQuantity(),
+                receivingStockItem.getAvailableQuantity()
+        );
+    }
 }

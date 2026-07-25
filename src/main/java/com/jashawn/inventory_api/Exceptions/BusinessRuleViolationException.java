@@ -7,7 +7,7 @@ public class BusinessRuleViolationException extends BaseDomainException {
         super(
                 HttpStatus.BAD_REQUEST,
                 ErrorCode.BUSINESS_RULE_VIOLATION.name(),
-                "Business rule violated for " + noun + ":" + field + value + " is not allowed."
+                "Business rule violated for " + noun + ":" + field + " " + value + " is not allowed."
                 );
     }
 }

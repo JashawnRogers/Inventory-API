@@ -355,6 +355,88 @@ public class StockMovement {
         );
     }
 
+    public static StockMovement transferIn(StockItem stockItem,
+                                           Employee performedByEmployee,
+                                           int quantity,
+                                           String reason,
+                                           String reference) {
+        if (stockItem == null) {
+            throw new InvalidFieldException("null", "StockMovement", "stockItem");
+        }
+
+        if (performedByEmployee == null) {
+            throw new InvalidFieldException("null", "StockMovement", "employee");
+        }
+
+        if (quantity <= 0) {
+            throw new InvalidFieldException(String.valueOf(quantity), "StockMovement", "quantity");
+        }
+
+        if (reason == null || reason.isBlank()) {
+            throw new InvalidFieldException(reason, "StockMovement", "reason");
+        }
+
+        if (reference == null || reference.isBlank()) {
+            throw new InvalidFieldException(reference, "StockMovement", "reference");
+        }
+
+        BigDecimal unitCost = stockItem.getProduct().getUnitCost();
+        BigDecimal totalCost = unitCost.multiply(BigDecimal.valueOf(quantity));
+
+        return new StockMovement(
+                stockItem,
+                performedByEmployee,
+                null,
+                MovementType.TRANSFER_IN,
+                quantity,
+                unitCost,
+                totalCost,
+                reason,
+                reference
+        );
+    }
+
+    public static StockMovement transferOut(StockItem stockItem,
+                                           Employee performedByEmployee,
+                                           int quantity,
+                                           String reason,
+                                           String reference) {
+        if (stockItem == null) {
+            throw new InvalidFieldException("null", "StockMovement", "stockItem");
+        }
+
+        if (performedByEmployee == null) {
+            throw new InvalidFieldException("null", "StockMovement", "employee");
+        }
+
+        if (quantity <= 0) {
+            throw new InvalidFieldException(String.valueOf(quantity), "StockMovement", "quantity");
+        }
+
+        if (reason == null || reason.isBlank()) {
+            throw new InvalidFieldException(reason, "StockMovement", "reason");
+        }
+
+        if (reference == null || reference.isBlank()) {
+            throw new InvalidFieldException(reference, "StockMovement", "reference");
+        }
+
+        BigDecimal unitCost = stockItem.getProduct().getUnitCost();
+        BigDecimal totalCost = unitCost.multiply(BigDecimal.valueOf(quantity));
+
+        return new StockMovement(
+                stockItem,
+                performedByEmployee,
+                null,
+                MovementType.TRANSFER_OUT,
+                quantity,
+                unitCost,
+                totalCost,
+                reason,
+                reference
+        );
+    }
+
     @PrePersist
     private void initialize() {
         this.createdAt = LocalDateTime.now();

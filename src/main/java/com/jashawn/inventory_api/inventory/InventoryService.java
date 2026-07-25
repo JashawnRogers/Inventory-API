@@ -1,5 +1,6 @@
 package com.jashawn.inventory_api.inventory;
 
+import com.jashawn.inventory_api.Exceptions.BusinessRuleViolationException;
 import com.jashawn.inventory_api.Exceptions.ResourceNotFoundException;
 import com.jashawn.inventory_api.department.Department;
 import com.jashawn.inventory_api.department.DepartmentRepository;
@@ -9,10 +10,12 @@ import com.jashawn.inventory_api.inventory.dto.*;
 import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.product.ProductRepository;
 import com.jashawn.inventory_api.product.dto.ProductDtoMapper;
+import com.jashawn.inventory_api.product.dto.ProductSummary;
 import com.jashawn.inventory_api.stockItem.StockItem;
 import com.jashawn.inventory_api.stockItem.StockItemRepository;
 import com.jashawn.inventory_api.stockItem.dto.StockItemDtoMapper;
 import com.jashawn.inventory_api.stockItem.dto.StockItemResponse;
+import com.jashawn.inventory_api.stockItem.dto.StockItemTransferResponse;
 import com.jashawn.inventory_api.stockMovement.StockMovement;
 import com.jashawn.inventory_api.stockMovement.StockMovementRepository;
 import com.jashawn.inventory_api.warehouse.Warehouse;
@@ -273,6 +276,7 @@ public class InventoryService {
         );
     }
 
+    @Transactional
     public StockItemResponse decreaseByAdjustment(ManualAdjustmentRequest request) {
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "ID", request.productId().toString()));
@@ -300,7 +304,7 @@ public class InventoryService {
                         "StockItem", "product id and warehouse id", product.getId() + " " + warehouse.getId())
                 );
 
-        stockItem.increaseByAdjustment(request.quantity());
+        stockItem.decreaseByAdjustment(request.quantity());
 
         StockMovement stockMovement = StockMovement.decreaseByAdjustment(
                 stockItem,
@@ -317,6 +321,77 @@ public class InventoryService {
                 stockItem,
                 ProductDtoMapper.toSummaryDto(product),
                 WarehouseDtoMapper.toSummaryDto(warehouse)
+        );
+    }
+
+    @Transactional
+    public StockItemTransferResponse transferBetweenWarehouses(WarehouseTransferRequest request) {
+        if (request.issuingWarehouseId() == request.receivingWarehouseId()) {
+            throw new BusinessRuleViolationException(
+                    "Warehouse transfer operation", "Transfers within", "single warehouse"
+            );
+        }
+
+        Product product = productRepository.findById(request.productId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "ID", request.productId().toString()));
+
+        Employee employee = employeeRepository.findById(request.performedByEmployeeId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Employee", "ID", request.performedByEmployeeId().toString())
+                );
+
+        Warehouse issuingWarehouse = warehouseRepository.findById(request.issuingWarehouseId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Issuing warehouse", "ID", request.issuingWarehouseId().toString())
+                );
+
+        Warehouse receivingWarehouse = warehouseRepository.findById(request.receivingWarehouseId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Receiving warehouse", "ID", request.receivingWarehouseId().toString())
+                );
+
+        product.enforceActiveState(product.getName());
+        employee.enforceActiveState(employee.getFullName());
+        issuingWarehouse.enforceActiveState(issuingWarehouse.getName());
+        receivingWarehouse.enforceActiveState(receivingWarehouse.getName());
+
+        StockItem issuingStockItem = stockItemRepository
+                .findByProductIdAndWarehouseId(product.getId(), issuingWarehouse.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "StockItem", "product id and issuing warehouse id", product.getId() + " " + issuingWarehouse.getId())
+                );
+
+        StockItem receivingStockItem = stockItemRepository
+                .findByProductIdAndWarehouseId(product.getId(), receivingWarehouse.getId())
+                .orElseGet(() -> StockItem.create(product, receivingWarehouse, 0, 0));
+
+        issuingStockItem.issue(request.quantity());
+        receivingStockItem.receive(request.quantity());
+
+        StockMovement transferOutStockMovement = StockMovement.transferOut(
+                issuingStockItem,
+                employee,
+                request.quantity(),
+                request.reason(),
+                request.reference()
+        );
+
+        StockMovement transferInStockMovement = StockMovement.transferIn(
+                receivingStockItem,
+                employee,
+                request.quantity(),
+                request.reason(),
+                request.reference()
+        );
+
+        stockMovementRepository.save(transferOutStockMovement);
+        stockMovementRepository.save(transferInStockMovement);
+
+        return StockItemDtoMapper.toTransferResponse(issuingStockItem,
+                ProductDtoMapper.toSummaryDto(product),
+                WarehouseDtoMapper.toSummaryDto(issuingWarehouse),
+                receivingStockItem,
+                WarehouseDtoMapper.toSummaryDto(receivingWarehouse)
         );
     }
 }
