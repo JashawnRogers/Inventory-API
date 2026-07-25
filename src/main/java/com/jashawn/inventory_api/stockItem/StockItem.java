@@ -136,13 +136,34 @@ public class StockItem {
         this.reservedQuantity -= quantity;
     }
 
+    public void increaseByAdjustment(int quantity) {
+        validatePositiveQuantity(quantity);
+        this.quantityOnHand += quantity;
+    }
+
+    public void decreaseByAdjustment(int quantity) {
+        validateNegativeQuantity(quantity);
+
+        if ((getQuantityOnHand() - quantity) < 0) {
+            throw new BusinessRuleViolationException("Stock adjustment operation", "quantity on hand", "less than 0");
+        }
+    }
+
     public int getAvailableQuantity() {
         return getQuantityOnHand() - getReservedQuantity();
     }
 
     private void validatePositiveQuantity(int quantity) {
-        if (quantity < 0) {
-            throw new BusinessRuleViolationException("Stock issue operation", "quantity", "less than 0");
+        if (quantity <= 0) {
+            throw new BusinessRuleViolationException("Stock issue operation", "quantity", "less than or equal to 0");
+        }
+    }
+
+    private void validateNegativeQuantity(int quantity) {
+        if (quantity >= 0) {
+            throw new BusinessRuleViolationException(
+                    "Stock issue operation", "quantity", "greater than or equal to 0"
+            );
         }
     }
 

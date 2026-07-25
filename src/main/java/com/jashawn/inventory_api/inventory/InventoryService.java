@@ -5,10 +5,7 @@ import com.jashawn.inventory_api.department.Department;
 import com.jashawn.inventory_api.department.DepartmentRepository;
 import com.jashawn.inventory_api.employee.Employee;
 import com.jashawn.inventory_api.employee.EmployeeRepository;
-import com.jashawn.inventory_api.inventory.dto.IssueStockItemRequest;
-import com.jashawn.inventory_api.inventory.dto.ReceiveInventoryRequest;
-import com.jashawn.inventory_api.inventory.dto.ReleaseReservationRequest;
-import com.jashawn.inventory_api.inventory.dto.ReserveStockItemRequest;
+import com.jashawn.inventory_api.inventory.dto.*;
 import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.product.ProductRepository;
 import com.jashawn.inventory_api.product.dto.ProductDtoMapper;
@@ -215,6 +212,54 @@ public class InventoryService {
                 employee,
                 department,
                 request.quantityReleased(),
+                request.reason(),
+                request.reference()
+        );
+
+        stockMovementRepository.save(stockMovement);
+
+        return StockItemDtoMapper.toDto(
+                stockItem,
+                ProductDtoMapper.toSummaryDto(product),
+                WarehouseDtoMapper.toSummaryDto(warehouse)
+        );
+    }
+
+    @Transactional
+    public StockItemResponse increaseByAdjustment(IncreaseByAdjustmentRequest request) {
+        Product product = productRepository.findById(request.productId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "ID", request.productId().toString()));
+
+        Warehouse warehouse = warehouseRepository.findById(request.warehouseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse", "ID", request.warehouseId().toString()));
+
+        Department department = departmentRepository.findById(request.optionalDepartmentId())
+                .orElse(null);
+
+        Employee employee = employeeRepository.findById(request.performedByEmployeeId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Employee", "ID", request.performedByEmployeeId().toString())
+                );
+
+        product.enforceActiveState("Product");
+        warehouse.enforceActiveState("Warehouse");
+        employee.enforceActiveState("Employee");
+        if (department != null) {
+            department.enforceActiveState("Department");
+        }
+
+        StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "StockItem", "product id and warehouse id", product.getId() + " " + warehouse.getId())
+                );
+
+        stockItem.increaseByAdjustment(request.quantity());
+
+        StockMovement stockMovement = StockMovement.increaseByAdjustment(
+                stockItem,
+                employee,
+                department,
+                request.quantity(),
                 request.reason(),
                 request.reference()
         );
