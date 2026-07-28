@@ -40,6 +40,7 @@ public class Department implements ActiveStateEnforcer {
     private Department(String name, String code) {
         this.name = name;
         this.code = code;
+        this.active = true;
     }
 
     public static Department create(String name, String code) {
@@ -104,7 +105,6 @@ public class Department implements ActiveStateEnforcer {
 
     @PrePersist
     private void initialize() {
-        this.active = true;
         this.createdAt = LocalDateTime.now();
     }
 

@@ -43,7 +43,7 @@ public class Category {
     }
 
     public static Category create(String name, String description) {
-        if (name == null || !name.isBlank()) {
+        if (name == null || name.isBlank()) {
             throw new InvalidFieldException(name, "Category", "name");
         }
 

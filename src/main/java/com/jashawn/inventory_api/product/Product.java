@@ -70,13 +70,13 @@ public class Product implements ActiveStateEnforcer {
             Category category,
             Supplier supplier
     ) {
-        if (name == null || !name.isBlank()) {
+        if (name == null || name.isBlank()) {
             throw new InvalidFieldException(name, "Product", "name");
         } else {
             this.name = name.trim();
         }
 
-        if (sku == null || !sku.isBlank()) {
+        if (sku == null || sku.isBlank()) {
             throw new InvalidFieldException(sku, "Product", "sku");
         } else {
             this.sku = sku.trim();
@@ -109,6 +109,8 @@ public class Product implements ActiveStateEnforcer {
         } else {
             this.supplier = supplier;
         }
+
+        this.active = true;
     }
 
     public static Product create(String name,
@@ -209,7 +211,6 @@ public class Product implements ActiveStateEnforcer {
 
     @PrePersist
     private void initialize() {
-        this.active = true;
         this.createdAt = LocalDateTime.now();
     }
 

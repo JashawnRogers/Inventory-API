@@ -52,6 +52,7 @@ public class Employee implements ActiveStateEnforcer {
         this.lastName = lastName;
         this.email = email;
         this.department = department;
+        this.active = true;
     }
 
     public static Employee create(String firstName, String lastName, String email, Department department) {
@@ -161,7 +162,6 @@ public class Employee implements ActiveStateEnforcer {
 
     @PrePersist
     private void initialize() {
-        this.active = true;
         this.createdAt = LocalDateTime.now();
     }
 

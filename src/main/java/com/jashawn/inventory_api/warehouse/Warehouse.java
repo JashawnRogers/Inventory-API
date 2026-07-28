@@ -40,6 +40,7 @@ public class Warehouse implements ActiveStateEnforcer {
     private Warehouse(String name, String location) {
         this.name = name;
         this.location = location;
+        this.active = true;
     }
 
     public static Warehouse create(String name, String location) {
@@ -100,7 +101,6 @@ public class Warehouse implements ActiveStateEnforcer {
 
     @PrePersist
     private void initialize() {
-        this.active = true;
         this.createdAt = LocalDateTime.now();
     }
 

@@ -10,7 +10,6 @@ import com.jashawn.inventory_api.inventory.dto.*;
 import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.product.ProductRepository;
 import com.jashawn.inventory_api.product.dto.ProductDtoMapper;
-import com.jashawn.inventory_api.product.dto.ProductSummary;
 import com.jashawn.inventory_api.stockItem.StockItem;
 import com.jashawn.inventory_api.stockItem.StockItemRepository;
 import com.jashawn.inventory_api.stockItem.dto.StockItemDtoMapper;
