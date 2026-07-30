@@ -1,12 +1,14 @@
 package com.jashawn.inventory_api.inventory;
 
 import com.jashawn.inventory_api.Exceptions.InsufficientAvailableStockException;
+import com.jashawn.inventory_api.Exceptions.InvalidStockMovementException;
 import com.jashawn.inventory_api.category.Category;
 import com.jashawn.inventory_api.department.Department;
 import com.jashawn.inventory_api.department.DepartmentRepository;
 import com.jashawn.inventory_api.employee.Employee;
 import com.jashawn.inventory_api.employee.EmployeeRepository;
 import com.jashawn.inventory_api.inventory.dto.IssueStockItemRequest;
+import com.jashawn.inventory_api.inventory.dto.ReleaseReservationRequest;
 import com.jashawn.inventory_api.inventory.dto.ReserveStockItemRequest;
 import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.product.ProductRepository;
@@ -193,7 +195,71 @@ class InventoryServiceTest {
     }
 
     @Test
-    void releaseReservation() {
+    @DisplayName("Cannot release more reserved stock than what is available")
+    void cannotReleaseMoreReservedStockThanWhatIsAvailable() throws Exception {
+        UUID performedByEmployeeId = UUID.randomUUID();
+        UUID productId = UUID.randomUUID();
+        UUID warehouseId = UUID.randomUUID();
+        UUID releasedToDepartmentId = UUID.randomUUID();
+
+        Product product = Product.create(
+                "Product",
+                "1234",
+                "description",
+                BigDecimal.TEN,
+                0,
+                Category.create("Category1", "Description"),
+                Supplier.create("Supplier", "email@email.com", "123-456-7890")
+        );
+
+        Warehouse warehouse = Warehouse.create("Warehouse", "Location");
+        Department releasedToDepartment = Department.create("Department", "1234");
+
+        Employee performedByEmployee = Employee.create(
+                "Jashawn",
+                "Codes",
+                "email@email.com",
+                releasedToDepartment
+        );
+
+        ReleaseReservationRequest request = ReleaseReservationRequest.builder()
+                .performedByEmployeeId(performedByEmployeeId)
+                .productId(productId)
+                .warehouseId(warehouseId)
+                .releasedToDepartmentId(releasedToDepartmentId)
+                .quantityReleased(100)
+                .reason("reason")
+                .reference("reference")
+                .build();
+
+        StockItem stockItem = StockItem.create(product, warehouse, 50, 0);
+
+        Field[] productFields = product.getClass().getDeclaredFields();
+        Field[] warehouseFields = warehouse.getClass().getDeclaredFields();
+
+        for (Field field : productFields) {
+            if (field.getName().equals("id")) {
+                field.setAccessible(true);
+                field.set(product, productId);
+            }
+        }
+
+        for (Field field : warehouseFields) {
+            if (field.getName().equals("id")) {
+                field.setAccessible(true);
+                field.set(warehouse, warehouseId);
+            }
+        }
+
+        when(productRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(product));
+        when(warehouseRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(warehouse));
+        when(employeeRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(performedByEmployee));
+        when(departmentRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(releasedToDepartment));
+        when(stockItemRepository.findByProductIdAndWarehouseId(Mockito.any(UUID.class), Mockito.any(UUID.class)))
+                .thenReturn(Optional.of(stockItem));
+
+
+        assertThrows(InvalidStockMovementException.class, () -> inventoryService.releaseReservation(request));
     }
 
     @Test
