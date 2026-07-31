@@ -175,6 +175,7 @@ public class StockItem {
     @PreUpdate
     private void setUpdatedAt() {
         this.updatedAt = LocalDateTime.now();
+
     }
 
 }

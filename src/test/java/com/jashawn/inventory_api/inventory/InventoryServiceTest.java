@@ -7,14 +7,12 @@ import com.jashawn.inventory_api.department.Department;
 import com.jashawn.inventory_api.department.DepartmentRepository;
 import com.jashawn.inventory_api.employee.Employee;
 import com.jashawn.inventory_api.employee.EmployeeRepository;
-import com.jashawn.inventory_api.inventory.dto.IssueStockItemRequest;
-import com.jashawn.inventory_api.inventory.dto.ManualAdjustmentRequest;
-import com.jashawn.inventory_api.inventory.dto.ReleaseReservationRequest;
-import com.jashawn.inventory_api.inventory.dto.ReserveStockItemRequest;
+import com.jashawn.inventory_api.inventory.dto.*;
 import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.product.ProductRepository;
 import com.jashawn.inventory_api.stockItem.StockItem;
 import com.jashawn.inventory_api.stockItem.StockItemRepository;
+import com.jashawn.inventory_api.stockItem.dto.StockItemTransferResponse;
 import com.jashawn.inventory_api.stockMovement.StockMovementRepository;
 import com.jashawn.inventory_api.supplier.Supplier;
 import com.jashawn.inventory_api.warehouse.Warehouse;
@@ -330,6 +328,84 @@ class InventoryServiceTest {
     }
 
     @Test
-    void transferBetweenWarehouses() {
+    @DisplayName("Transfers between warehouses updates both stock items")
+    void transferBetweenWarehousesUpdatesBothStockItems() throws Exception {
+        UUID productId = UUID.randomUUID();
+        UUID issuingWarehouseId = UUID.randomUUID();
+        UUID receivingWarehouseId = UUID.randomUUID();
+        UUID performedByEmployeeId = UUID.randomUUID();
+
+        Product product = Product.create(
+                "Product",
+                "1234",
+                "description",
+                BigDecimal.TEN,
+                0,
+                Category.create("Category1", "Description"),
+                Supplier.create("Supplier", "email@email.com", "123-456-7890")
+        );
+
+        Warehouse issuingWarehouse = Warehouse.create("Issuing Warehouse", "Issue");
+        Warehouse receivingWarehouse = Warehouse.create("Receiving Warehouse", "Receive");
+        Department employeeDepartment = Department.create("Department", "1234");
+
+        Employee performedByEmployee = Employee.create(
+                "Jashawn",
+                "Codes",
+                "email@email.com",
+                employeeDepartment
+        );
+
+        WarehouseTransferRequest request = WarehouseTransferRequest.builder()
+                .productId(productId)
+                .issuingWarehouseId(issuingWarehouseId)
+                .receivingWarehouseId(receivingWarehouseId)
+                .performedByEmployeeId(performedByEmployeeId)
+                .quantity(25)
+                .reason("reason")
+                .reference("reference")
+                .build();
+
+        StockItem issuingStockItem = StockItem.create(product, issuingWarehouse, 30, 0);
+        StockItem receivingStockItem = StockItem.create(product, receivingWarehouse, 0, 0);
+
+        Field[] productFields = product.getClass().getDeclaredFields();
+        Field[] issuingWarehouseFields = issuingWarehouse.getClass().getDeclaredFields();
+        Field[] receivingWarehouseFields = receivingWarehouse.getClass().getDeclaredFields();
+
+        for (Field field : productFields) {
+            if (field.getName().equals("id")) {
+                field.setAccessible(true);
+                field.set(product, productId);
+            }
+        }
+
+        for (Field field : issuingWarehouseFields) {
+            if (field.getName().equals("id")) {
+                field.setAccessible(true);
+                field.set(issuingWarehouse, issuingWarehouseId);
+            }
+        }
+
+        for (Field field : receivingWarehouseFields) {
+            if (field.getName().equals("id")) {
+                field.setAccessible(true);
+                field.set(receivingWarehouse, receivingWarehouseId);
+            }
+        }
+
+        when(productRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(product));
+        when(employeeRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(performedByEmployee));
+        when(warehouseRepository.findById(issuingWarehouseId)).thenReturn(Optional.of(issuingWarehouse));
+        when(warehouseRepository.findById(receivingWarehouseId)).thenReturn(Optional.of(receivingWarehouse));
+        when(stockItemRepository.findByProductIdAndWarehouseId(productId, issuingWarehouseId))
+                .thenReturn(Optional.of(issuingStockItem));
+        when(stockItemRepository.findByProductIdAndWarehouseId(productId, receivingWarehouseId))
+                .thenReturn(Optional.of(receivingStockItem));
+
+        StockItemTransferResponse response = inventoryService.transferBetweenWarehouses(request);
+
+        assertEquals(5, response.issuingAvailableQuantity());
+        assertEquals(25, response.receivingAvailableQuantity());
     }
 }

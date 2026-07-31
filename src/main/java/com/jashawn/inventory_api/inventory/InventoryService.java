@@ -58,9 +58,9 @@ public class InventoryService {
         Employee performedBy = employeeRepository.findById(request.employeeId())
                         .orElseThrow(() -> new ResourceNotFoundException("Employee", "ID", request.employeeId().toString()));
 
-        product.enforceActiveState("Product");
-        warehouse.enforceActiveState("Warehouse");
-        performedBy.enforceActiveState("Employee");
+        product.enforceActiveState(product.getName());
+        warehouse.enforceActiveState(warehouse.getName());
+        performedBy.enforceActiveState(performedBy.getFullName());
 
         StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
                 .orElseGet(() -> StockItem.create(product, warehouse, 0, 0));
@@ -102,10 +102,10 @@ public class InventoryService {
                         "Department", "ID", request.receivingDepartmentId().toString())
                 );
 
-        product.enforceActiveState("Product");
-        warehouse.enforceActiveState("Warehouse");
-        receivingDepartment.enforceActiveState("Receiving Department");
-        employee.enforceActiveState("Employee");
+        product.enforceActiveState(product.getName());
+        warehouse.enforceActiveState(warehouse.getName());r);
+        receivingDepartment.enforceActiveState(receivingDepartment.getName() + ": Receiving Department");
+        employee.enforceActiveState(employee.getFullName());
 
         StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -150,10 +150,10 @@ public class InventoryService {
                         "Department", "ID", request.reservedForDepartmentId().toString())
                 );
 
-        employee.enforceActiveState("Employee");
-        product.enforceActiveState("Product");
-        warehouse.enforceActiveState("Warehouse");
-        department.enforceActiveState("Department");
+        employee.enforceActiveState(employee.getFullName());
+        product.enforceActiveState(product.getName());
+        warehouse.enforceActiveState(warehouse.getName());
+        department.enforceActiveState(department.getName());
 
         StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -197,10 +197,10 @@ public class InventoryService {
                                 "Department", "ID", request.releasedToDepartmentId().toString())
                         );
 
-        product.enforceActiveState("Product");
-        employee.enforceActiveState("Employee");
-        warehouse.enforceActiveState("Warehouse");
-        department.enforceActiveState("Department");
+        product.enforceActiveState(product.getName());
+        employee.enforceActiveState(employee.getFullName());
+        warehouse.enforceActiveState(warehouse.getName());
+        department.enforceActiveState(warehouse.getName());
 
         StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -248,11 +248,11 @@ public class InventoryService {
                         "Employee", "ID", request.performedByEmployeeId().toString())
                 );
 
-        product.enforceActiveState("Product");
-        warehouse.enforceActiveState("Warehouse");
-        employee.enforceActiveState("Employee");
+        product.enforceActiveState(product.getName());
+        warehouse.enforceActiveState(warehouse.getName());
+        employee.enforceActiveState(employee.getFullName());
         if (department != null) {
-            department.enforceActiveState("Department");
+            department.enforceActiveState(department.getName());
         }
 
         StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
@@ -301,11 +301,11 @@ public class InventoryService {
                         "Employee", "ID", request.performedByEmployeeId().toString())
                 );
 
-        product.enforceActiveState("Product");
-        warehouse.enforceActiveState("Warehouse");
-        employee.enforceActiveState("Employee");
+        product.enforceActiveState(product.getName());
+        warehouse.enforceActiveState(warehouse.getName());
+        employee.enforceActiveState(employee.getFullName());
         if (department != null) {
-            department.enforceActiveState("Department");
+            department.enforceActiveState(department.getName());
         }
 
         StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())

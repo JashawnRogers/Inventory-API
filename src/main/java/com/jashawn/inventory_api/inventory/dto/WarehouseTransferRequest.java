@@ -1,7 +1,10 @@
 package com.jashawn.inventory_api.inventory.dto;
 
+import lombok.Builder;
+
 import java.util.UUID;
 
+@Builder
 public record WarehouseTransferRequest(UUID productId,
                                        UUID issuingWarehouseId,
                                        UUID receivingWarehouseId,
