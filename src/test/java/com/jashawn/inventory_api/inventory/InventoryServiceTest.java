@@ -12,6 +12,7 @@ import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.product.ProductRepository;
 import com.jashawn.inventory_api.stockItem.StockItem;
 import com.jashawn.inventory_api.stockItem.StockItemRepository;
+import com.jashawn.inventory_api.stockItem.dto.StockItemResponse;
 import com.jashawn.inventory_api.stockItem.dto.StockItemTransferResponse;
 import com.jashawn.inventory_api.stockMovement.StockMovementRepository;
 import com.jashawn.inventory_api.supplier.Supplier;
@@ -41,10 +42,10 @@ class InventoryServiceTest {
     private StockItemRepository stockItemRepository;
 
     @Mock
-    private StockMovementRepository stockMovementRepository;
+    private WarehouseRepository warehouseRepository;
 
     @Mock
-    private WarehouseRepository warehouseRepository;
+    private StockMovementRepository stockMovementRepository;
 
     @Mock
     private ProductRepository productRepository;
@@ -262,8 +263,8 @@ class InventoryServiceTest {
     }
 
     @Test
-    @DisplayName("Decrease adjustment decreases stock quantity")
-    void decreaseByAdjustmentDecreasesAvailableStockQuantity() throws Exception {
+    @DisplayName("Decrease adjustment decreases available stock quantity and does not decrease reserved stock quantity")
+    void decreaseByAdjustmentDecreasesAvailableStockQuantityNotReservedQuantity() throws Exception {
         UUID productId = UUID.randomUUID();
         UUID warehouseId = UUID.randomUUID();
         UUID performedByEmployeeId = UUID.randomUUID();
@@ -323,7 +324,10 @@ class InventoryServiceTest {
         when(stockItemRepository.findByProductIdAndWarehouseId(Mockito.any(UUID.class), Mockito.any(UUID.class)))
                 .thenReturn(Optional.of(stockItem));
 
-        assertEquals(15, inventoryService.decreaseByAdjustment(request).availableQuantity());
+        StockItemResponse response = inventoryService.decreaseByAdjustment(request);
+
+        assertEquals(15, response.availableQuantity());
+        assertEquals(25, response.reservedQuantity());
 
     }
 
