@@ -103,7 +103,7 @@ public class InventoryService {
                 );
 
         product.enforceActiveState(product.getName());
-        warehouse.enforceActiveState(warehouse.getName());r);
+        warehouse.enforceActiveState(warehouse.getName());
         receivingDepartment.enforceActiveState(receivingDepartment.getName() + ": Receiving Department");
         employee.enforceActiveState(employee.getFullName());
 
