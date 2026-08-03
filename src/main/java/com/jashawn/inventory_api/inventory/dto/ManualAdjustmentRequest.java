@@ -1,15 +1,20 @@
 package com.jashawn.inventory_api.inventory.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 
 import java.util.UUID;
 
 @Builder
-public record ManualAdjustmentRequest(UUID productId,
-                                      UUID warehouseId,
-                                      UUID optionalDepartmentId,
-                                      UUID performedByEmployeeId,
-                                      int quantity,
-                                      String reason,
-                                      String reference) {
+public record ManualAdjustmentRequest(
+        @NotNull UUID productId,
+        @NotNull UUID warehouseId,
+        @NotNull UUID optionalDepartmentId,
+        @NotNull UUID performedByEmployeeId,
+        @Positive int quantity,
+        @NotBlank String reason,
+        @NotBlank String reference
+) {
 }

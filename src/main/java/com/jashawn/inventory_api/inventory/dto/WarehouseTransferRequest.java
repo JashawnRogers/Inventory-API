@@ -1,15 +1,20 @@
 package com.jashawn.inventory_api.inventory.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 
 import java.util.UUID;
 
 @Builder
-public record WarehouseTransferRequest(UUID productId,
-                                       UUID issuingWarehouseId,
-                                       UUID receivingWarehouseId,
-                                       UUID performedByEmployeeId,
-                                       int quantity,
-                                       String reason,
-                                       String reference) {
+public record WarehouseTransferRequest(
+        @NotNull UUID productId,
+        @NotNull UUID issuingWarehouseId,
+        @NotNull UUID receivingWarehouseId,
+        @NotNull UUID performedByEmployeeId,
+        @Positive int quantity,
+        @NotBlank String reason,
+        @NotBlank String reference
+) {
 }

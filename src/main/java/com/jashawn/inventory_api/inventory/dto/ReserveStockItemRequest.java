@@ -1,15 +1,20 @@
 package com.jashawn.inventory_api.inventory.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 
 import java.util.UUID;
 
 @Builder
-public record ReserveStockItemRequest(UUID performedByEmployeeId,
-                                      UUID productId,
-                                      UUID warehouseId,
-                                      UUID reservedForDepartmentId,
-                                      int quantityReserved,
-                                      String reason,
-                                      String reference) {
+public record ReserveStockItemRequest(
+        @NotNull UUID performedByEmployeeId,
+        @NotNull UUID productId,
+        @NotNull UUID warehouseId,
+        @NotNull UUID reservedForDepartmentId,
+        @Positive int quantityReserved,
+        @NotBlank String reason,
+        @NotBlank String reference
+) {
 }

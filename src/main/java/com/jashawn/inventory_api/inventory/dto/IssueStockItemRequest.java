@@ -1,14 +1,19 @@
 package com.jashawn.inventory_api.inventory.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 
 import java.util.UUID;
 
 @Builder
-public record IssueStockItemRequest(UUID productId,
-                                    UUID warehouseId,
-                                    UUID employeeId,
-                                    UUID receivingDepartmentId,
-                                    int quantity,
-                                    String reason,
-                                    String reference) {}
+public record IssueStockItemRequest(
+        @NotNull UUID productId,
+        @NotNull UUID warehouseId,
+        @NotNull UUID employeeId,
+        @NotNull UUID receivingDepartmentId,
+        @Positive int quantity,
+        @NotBlank String reason,
+        @NotBlank String reference
+) {}

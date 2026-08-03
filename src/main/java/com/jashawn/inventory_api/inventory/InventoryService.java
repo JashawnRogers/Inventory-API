@@ -56,7 +56,7 @@ public class InventoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse", "ID", request.warehouseId().toString()));
 
         Employee performedBy = employeeRepository.findById(request.employeeId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Employee", "ID", request.employeeId().toString()));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee", "ID", request.employeeId().toString()));
 
         product.enforceActiveState(product.getName());
         warehouse.enforceActiveState(warehouse.getName());
@@ -193,14 +193,14 @@ public class InventoryService {
                 );
 
         Department department = departmentRepository.findById(request.releasedToDepartmentId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Department", "ID", request.releasedToDepartmentId().toString())
-                        );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Department", "ID", request.releasedToDepartmentId().toString())
+                );
 
         product.enforceActiveState(product.getName());
         employee.enforceActiveState(employee.getFullName());
         warehouse.enforceActiveState(warehouse.getName());
-        department.enforceActiveState(warehouse.getName());
+        department.enforceActiveState(department.getName());
 
         StockItem stockItem = stockItemRepository.findByProductIdAndWarehouseId(product.getId(), warehouse.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -405,3 +405,4 @@ public class InventoryService {
         );
     }
 }
+
