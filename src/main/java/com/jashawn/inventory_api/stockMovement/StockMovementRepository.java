@@ -17,11 +17,11 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, UU
             @Param("endDate") LocalDateTime endDate
     );
 
-    @Query("SELECT sm FROM StockMovement am WHERE sm.department.id = :department")
+    @Query("SELECT sm FROM StockMovement sm WHERE sm.department.id = :departmentId")
     List<StockMovement> findByDepartment(@Param("departmentId") UUID departmentId);
 
     @Query("SELECT d.name AS departmentName, SUM(sm.totalCost) AS totalCost " +
-            "FROM stock_movement sm " +
+            "FROM StockMovement sm " +
             "JOIN sm.department d " +
             "WHERE sm.department IS NOT NULL " +
             "AND sm.createdAt BETWEEN :startDate AND :endDate " +
