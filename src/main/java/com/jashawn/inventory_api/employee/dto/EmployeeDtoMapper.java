@@ -16,6 +16,6 @@ public class EmployeeDtoMapper {
     }
 
     public static EmployeeSummary toSummary(Employee employee) {
-        return new EmployeeSummary(employee.getFullName(), employee.getDepartment().getCode());
+        return new EmployeeSummary(employee.getId(), employee.getFullName(), employee.getDepartment().getCode());
     }
 }

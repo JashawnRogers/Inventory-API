@@ -1,4 +1,6 @@
 package com.jashawn.inventory_api.department.dto;
 
-public record DepartmentSummary(String name, String code) {
+import java.util.UUID;
+
+public record DepartmentSummary(UUID id, String name, String code) {
 }

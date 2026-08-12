@@ -11,8 +11,6 @@ import java.util.UUID;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
-    Optional<Product> findByName(String name);
 
-    @Query("SELECT all FROM products WHERE all.")
-    List<Product> findAllProductsWithAvailableQuantity();
+    Optional<Product> findByName(String name);
 }
