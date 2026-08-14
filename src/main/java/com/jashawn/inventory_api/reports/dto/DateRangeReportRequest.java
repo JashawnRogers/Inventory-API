@@ -6,11 +6,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-public record MovementHistoryByDepartmentRequest(
-        @NotNull(message = "Department ID must not be null")
-        UUID departmentId,
+public record DateRangeReportRequest(
 
         @NotNull(message = "Start date is mandatory")
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -27,16 +24,15 @@ public record MovementHistoryByDepartmentRequest(
         Integer size
 
 ) implements PageableRequest {
+    @Override
+    public Integer getPageNumber() {
+        if (page == null) return 0;
+        return page;
+    }
 
-        @Override
-        public Integer getPageNumber() {
-                if (page == null) return 0;
-                return page;
-        }
-
-        @Override
-        public Integer getPageSize() {
-                if (size == null) return 25;
-                return size;
-        }
+    @Override
+    public Integer getPageSize() {
+        if (size == null) return 25;
+        return size;
+    }
 }

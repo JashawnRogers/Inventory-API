@@ -1,10 +1,8 @@
 package com.jashawn.inventory_api.reports;
 
 import com.jashawn.inventory_api.department.dto.DepartmentDtoMapper;
-import com.jashawn.inventory_api.reports.dto.DepartmentCostRequest;
-import com.jashawn.inventory_api.reports.dto.DepartmentCostResponse;
-import com.jashawn.inventory_api.reports.dto.MovementHistoryByDepartmentRequest;
-import com.jashawn.inventory_api.reports.dto.MovementHistoryRequest;
+import com.jashawn.inventory_api.reports.dto.*;
+import com.jashawn.inventory_api.stockItem.dto.StockItemResponse;
 import com.jashawn.inventory_api.stockMovement.StockMovementRepository;
 import com.jashawn.inventory_api.stockMovement.dto.StockMovementDtoMapper;
 import com.jashawn.inventory_api.stockMovement.dto.StockMovementResponse;
@@ -22,7 +20,7 @@ public class ReportService {
         this.stockMovementRepository = stockMovementRepository;
     }
 
-    public Page<StockMovementResponse> movementHistory(MovementHistoryRequest request) {
+    public Page<StockMovementResponse> movementHistory(DateRangeReportRequest request) {
         if (request.endDate().isBefore(request.startDate())) {
             throw new DateTimeException("End date must be after start date");
         }
@@ -30,7 +28,7 @@ public class ReportService {
         return stockMovementRepository.movementHistoryWithinDateRange(
                 request.startDate(),
                 request.endDate(),
-                request.toPageRequest()
+                request.toPageable()
         ).map(StockMovementDtoMapper::toDto);
     }
 
@@ -43,12 +41,12 @@ public class ReportService {
                     request.departmentId(),
                     request.startDate(),
                     request.endDate(),
-                    request.toPageRequest()
+                    request.toPageable()
                 )
                 .map(StockMovementDtoMapper::toDto);
     }
 
-    public Page<DepartmentCostResponse> departmentCosts(DepartmentCostRequest request) {
+    public Page<DepartmentCostResponse> departmentCosts(DateRangeReportRequest request) {
         if (request.endDate().isBefore(request.startDate())) {
             throw new DateTimeException("End date must be after start date");
         }
@@ -56,7 +54,11 @@ public class ReportService {
         return stockMovementRepository.getDepartmentCostsByDateRange(
                 request.startDate(),
                 request.endDate(),
-                request.toPageRequest()
+                request.toPageable()
         ).map(DepartmentDtoMapper::toCostResponse);
+    }
+
+    public Page<StockItemResponse> getStockItemsBetweenDateRange() {
+        return null;
     }
 }
