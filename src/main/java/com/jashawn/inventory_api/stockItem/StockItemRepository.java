@@ -1,15 +1,16 @@
 package com.jashawn.inventory_api.stockItem;
 
-import com.jashawn.inventory_api.stockItem.dto.InventoryValue;
-import com.jashawn.inventory_api.stockItem.dto.InventoryValueByWarehouse;
+import com.jashawn.inventory_api.inventory.projection.InventoryValue;
+import com.jashawn.inventory_api.inventory.projection.InventoryValueByWarehouse;
 import com.jashawn.inventory_api.stockItem.dto.StockAvailability;
 import com.jashawn.inventory_api.stockItem.dto.StockAvailabilityByWarehouse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,12 +19,13 @@ public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
     Optional<StockItem> findByProductIdAndWarehouseId(UUID productId, UUID warehouseId);
 
     @Query("SELECT s FROM StockItem s WHERE s.createdAt BETWEEN :startDate AND :endDate ")
-    List<StockItem> getStockItemsBetweenDateRange(
+    Page<StockItem> getStockItemsBetweenDateRange(
             @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
     );
 
-    @Query("SELECT p.name AS productName, SUM(s.quantityOnHand - s.reservedQuantity) AS availableStock " +
+    @Query("SELECT p.id AS productId, p.name AS productName, SUM(s.quantityOnHand - s.reservedQuantity) AS availableStock " +
             "FROM StockItem s " +
             "JOIN s.product p " +
             "JOIN s.warehouse w " +
@@ -31,9 +33,11 @@ public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
             "GROUP BY p.id, p.name, p.reorderPoint " +
             "HAVING SUM(s.quantityOnHand - s.reservedQuantity) <= p.reorderPoint"
     )
-    List<StockAvailability> getLowStockReport();
+    Page<StockAvailability> getLowStockReport(Pageable pageable);
 
     @Query("SELECT p.name AS productName, " +
+                "p.id AS productId, " +
+                "w.id AS warehouseId, " +
                 "w.name AS warehouseName, " +
                 "(s.quantityOnHand - s.reservedQuantity) AS availableStock " +
             "FROM StockItem s " +
@@ -50,7 +54,9 @@ public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
     );
 
     @Query("SELECT p.name AS productName, " +
+                "p.id AS productId," +
                 "w.name AS warehouseName," +
+                "w.id AS warehouseId," +
                 " p.unitCost AS productUnitCost, " +
                 "s.quantityOnHand AS quantityOnHand, " +
                 "(p.unitCost * s.quantityOnHand) AS inventoryValue " +
@@ -67,6 +73,7 @@ public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
     );
 
     @Query("SELECT p.name AS productName, " +
+                "p.id AS productId, " +
                 "p.unitCost AS productUnitCost, " +
                 "SUM(s.quantityOnHand) AS quantityOnHand, " +
                 "SUM(p.unitCost * s.quantityOnHand) AS inventoryValue " +
@@ -74,6 +81,6 @@ public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
             "JOIN s.product p " +
             "GROUP BY p.id, p.name, p.unitCost "
     )
-    List<InventoryValue> getGlobalInventoryValue();
+    Page<InventoryValue> getGlobalInventoryValue(Pageable pageable);
 
 }
