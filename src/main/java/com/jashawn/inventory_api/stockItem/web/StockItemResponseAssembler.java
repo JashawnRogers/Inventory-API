@@ -1,4 +1,4 @@
-package com.jashawn.inventory_api.inventory.web;
+package com.jashawn.inventory_api.stockItem.web;
 
 import com.jashawn.inventory_api.product.web.ProductController;
 import com.jashawn.inventory_api.stockItem.dto.StockItemResponse;
@@ -12,11 +12,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @Component
 public class StockItemResponseAssembler
-        implements RepresentationModelAssembler<StockItemResponse, EntityModel<StockItemResponse>> {
-
+implements RepresentationModelAssembler<StockItemResponse, EntityModel<StockItemResponse>> {
     @Override
     public EntityModel<StockItemResponse> toModel(@NonNull StockItemResponse entity) {
-        return EntityModel.of(entity)
+        return EntityModel.of(entity,
+                linkTo(methodOn(StockItemController.class).findStockItem(entity.id())).withSelfRel())
                 .add(linkTo(methodOn(ProductController.class).findProduct(entity.product().id())).withRel("product"))
                 .add(linkTo(methodOn(WarehouseController.class).findWarehouse(entity.warehouse().id())).withRel("warehouse"));
     }

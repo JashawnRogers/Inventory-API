@@ -4,6 +4,7 @@ import com.jashawn.inventory_api.inventory.InventoryService;
 import com.jashawn.inventory_api.inventory.dto.*;
 import com.jashawn.inventory_api.stockItem.dto.StockItemResponse;
 import com.jashawn.inventory_api.stockItem.dto.StockItemTransferResponse;
+import com.jashawn.inventory_api.stockItem.web.StockItemResponseAssembler;
 import jakarta.validation.Valid;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;

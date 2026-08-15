@@ -122,8 +122,8 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
-    public List<InventoryValueResponse> getGlobalInventoryValue(PageableCommand command) {
-        return stockItemRepository.getGlobalInventoryValue(command.toPageable()).stream()
+    public Page<InventoryValueResponse> getGlobalInventoryValue(PageableCommand command) {
+        return stockItemRepository.getGlobalInventoryValue(command.toPageable())
                 .map(stockItem -> new InventoryValueResponse(
                         stockItem.getProductName(),
                         stockItem.getProductId(),
@@ -131,6 +131,6 @@ public class ReportService {
                         stockItem.getProductUnitCost(),
                         stockItem.getInventoryValue()
                         )
-                ).toList();
+                );
     }
 }

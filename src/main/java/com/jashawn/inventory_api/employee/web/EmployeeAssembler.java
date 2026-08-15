@@ -3,9 +3,11 @@ package com.jashawn.inventory_api.employee.web;
 import com.jashawn.inventory_api.employee.dto.EmployeeResponse;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+@Component
 public class EmployeeAssembler implements RepresentationModelAssembler<EmployeeResponse, EntityModel<EmployeeResponse>> {
 
     @Override

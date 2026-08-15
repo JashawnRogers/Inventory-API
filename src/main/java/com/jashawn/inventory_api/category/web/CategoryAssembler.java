@@ -4,10 +4,11 @@ import com.jashawn.inventory_api.category.dto.CategoryResponse;
 import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-
+@Component
 public class CategoryAssembler implements RepresentationModelAssembler<CategoryResponse, EntityModel<CategoryResponse>> {
 
     @Override

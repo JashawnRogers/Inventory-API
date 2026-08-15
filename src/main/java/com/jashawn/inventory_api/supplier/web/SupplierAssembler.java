@@ -4,9 +4,11 @@ import com.jashawn.inventory_api.supplier.dto.SupplierResponse;
 import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+@Component
 public class SupplierAssembler implements RepresentationModelAssembler<SupplierResponse, EntityModel<SupplierResponse>> {
 
     @Override

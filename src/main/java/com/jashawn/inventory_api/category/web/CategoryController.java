@@ -19,8 +19,8 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class CategoryController {
 
-    CategoryService service;
-    CategoryAssembler assembler;
+    private final CategoryService service;
+    private final CategoryAssembler assembler;
 
     public CategoryController(CategoryService service, CategoryAssembler assembler) {
         this.service = service;
