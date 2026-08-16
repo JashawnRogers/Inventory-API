@@ -35,6 +35,17 @@ public interface StockItemRepository extends JpaRepository<StockItem, UUID> {
     )
     Page<StockAvailability> getLowStockReport(Pageable pageable);
 
+    @Query("SELECT p.id AS productId, p.name AS productName, SUM(s.quantityOnHand - s.reservedQuantity) AS availableStock " +
+            "FROM StockItem s " +
+            "JOIN s.product p " +
+            "JOIN s.warehouse w " +
+            "WHERE p.id = :productId " +
+            "AND w.active = true " +
+            "GROUP BY p.id, p.name, p.reorderPoint " +
+            "HAVING SUM(s.quantityOnHand - s.reservedQuantity) <= p.reorderPoint"
+    )
+    Optional<StockAvailability> getLowStockAlertForProduct(@Param("productId") UUID productId);
+
     @Query("SELECT p.name AS productName, " +
                 "p.id AS productId, " +
                 "w.id AS warehouseId, " +

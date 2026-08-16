@@ -7,6 +7,7 @@ import com.jashawn.inventory_api.department.DepartmentRepository;
 import com.jashawn.inventory_api.employee.Employee;
 import com.jashawn.inventory_api.employee.EmployeeRepository;
 import com.jashawn.inventory_api.inventory.dto.*;
+import com.jashawn.inventory_api.notifications.NotificationService;
 import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.product.ProductRepository;
 import com.jashawn.inventory_api.product.dto.ProductDtoMapper;
@@ -32,19 +33,23 @@ public class InventoryService {
     private final ProductRepository productRepository;
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
+    private final NotificationService notificationService;
 
     public InventoryService(StockItemRepository stockItemRepository,
                             StockMovementRepository stockMovementRepository,
                             WarehouseRepository warehouseRepository,
                             ProductRepository productRepository,
                             EmployeeRepository employeeRepository,
-                            DepartmentRepository departmentRepository) {
+                            DepartmentRepository departmentRepository,
+                            NotificationService notificationService
+    ) {
         this.stockItemRepository = stockItemRepository;
         this.stockMovementRepository = stockMovementRepository;
         this.warehouseRepository = warehouseRepository;
         this.productRepository = productRepository;
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -126,6 +131,9 @@ public class InventoryService {
 
         stockMovementRepository.save(stockMovement);
 
+        stockItemRepository.getLowStockAlertForProduct(product.getId())
+                .ifPresent(notificationService::sendLowStockAlert);
+
         return StockItemDtoMapper.toDto(stockItem,
                 ProductDtoMapper.toSummaryDto(product),
                 WarehouseDtoMapper.toSummaryDto(warehouse)
@@ -172,6 +180,9 @@ public class InventoryService {
         );
 
         stockMovementRepository.save(stockMovement);
+
+        stockItemRepository.getLowStockAlertForProduct(product.getId())
+                .ifPresent(notificationService::sendLowStockAlert);
 
         return StockItemDtoMapper.toDto(stockItem,
                 ProductDtoMapper.toSummaryDto(product),
@@ -326,6 +337,9 @@ public class InventoryService {
 
         stockMovementRepository.save(stockMovement);
 
+        stockItemRepository.getLowStockAlertForProduct(product.getId())
+                .ifPresent(notificationService::sendLowStockAlert);
+
         return StockItemDtoMapper.toDto(
                 stockItem,
                 ProductDtoMapper.toSummaryDto(product),
@@ -396,6 +410,9 @@ public class InventoryService {
 
         stockMovementRepository.save(transferOutStockMovement);
         stockMovementRepository.save(transferInStockMovement);
+
+        stockItemRepository.getLowStockAlertForProduct(product.getId())
+                .ifPresent(notificationService::sendLowStockAlert);
 
         return StockItemDtoMapper.toTransferResponse(issuingStockItem,
                 ProductDtoMapper.toSummaryDto(product),
