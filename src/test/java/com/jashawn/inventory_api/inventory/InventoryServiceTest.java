@@ -8,6 +8,7 @@ import com.jashawn.inventory_api.department.DepartmentRepository;
 import com.jashawn.inventory_api.employee.Employee;
 import com.jashawn.inventory_api.employee.EmployeeRepository;
 import com.jashawn.inventory_api.inventory.dto.*;
+import com.jashawn.inventory_api.notifications.NotificationService;
 import com.jashawn.inventory_api.product.Product;
 import com.jashawn.inventory_api.product.ProductRepository;
 import com.jashawn.inventory_api.stockItem.StockItem;
@@ -55,6 +56,9 @@ class InventoryServiceTest {
 
     @Mock
     private DepartmentRepository departmentRepository;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private InventoryService inventoryService;
@@ -323,6 +327,8 @@ class InventoryServiceTest {
         when(employeeRepository.findById(Mockito.any(UUID.class))).thenReturn(Optional.of(performedByEmployee));
         when(stockItemRepository.findByProductIdAndWarehouseId(Mockito.any(UUID.class), Mockito.any(UUID.class)))
                 .thenReturn(Optional.of(stockItem));
+        when(stockItemRepository.getLowStockAlertForProduct(Mockito.any(UUID.class)))
+                .thenReturn(Optional.empty());
 
         StockItemResponse response = inventoryService.decreaseByAdjustment(request);
 
@@ -406,6 +412,8 @@ class InventoryServiceTest {
                 .thenReturn(Optional.of(issuingStockItem));
         when(stockItemRepository.findByProductIdAndWarehouseId(productId, receivingWarehouseId))
                 .thenReturn(Optional.of(receivingStockItem));
+        when(stockItemRepository.getLowStockAlertForProduct(Mockito.any(UUID.class)))
+                .thenReturn(Optional.empty());
 
         StockItemTransferResponse response = inventoryService.transferBetweenWarehouses(request);
 

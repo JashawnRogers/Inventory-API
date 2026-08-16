@@ -414,7 +414,8 @@ public class InventoryService {
         stockItemRepository.getLowStockAlertForProduct(product.getId())
                 .ifPresent(notificationService::sendLowStockAlert);
 
-        return StockItemDtoMapper.toTransferResponse(issuingStockItem,
+        return StockItemDtoMapper.toTransferResponse(
+                issuingStockItem,
                 ProductDtoMapper.toSummaryDto(product),
                 WarehouseDtoMapper.toSummaryDto(issuingWarehouse),
                 receivingStockItem,
