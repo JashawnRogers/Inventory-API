@@ -1,6 +1,6 @@
 FROM eclipse-temurin:26-jre
 
-COPY ./target/*.jar inventory-api.jar
+COPY target/*.jar inventory-api.jar
 
 EXPOSE 8080
 
