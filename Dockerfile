@@ -24,6 +24,9 @@ FROM eclipse-temurin:21-jre
 # Sets the working directory inside the final runtime container.
 WORKDIR /app
 
+# Add environment variable
+ENV SPRING_PROFILES_ACTIVE=prod
+
 # Copies the built jar from the build stage into the runtime image.
 COPY --from=build /app/target/inventory-api.jar inventory-api.jar
 
